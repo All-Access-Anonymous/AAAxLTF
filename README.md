@@ -10,4 +10,6 @@ https://miro.com/app/board/uXjVOXwHq1M=/
 
 https://www.jordanmmck.com/crypto/olympus-dao?s=09
 
+https://0xkowloon.substack.com/p/dissecting-the-olympus-protocol
+
 https://forum.olympusdao.finance/d/77-oip-18-reward-rate-framework-and-reduction
