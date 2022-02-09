@@ -4,9 +4,9 @@ Initial main.py, testing workflow
 
 
 def add(a, b):
-    '''
+    """
     Docstring for add
-    '''
+    """
     return a + b
 
 
