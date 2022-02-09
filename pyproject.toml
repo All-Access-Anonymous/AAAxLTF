@@ -1,17 +1,17 @@
 [tool.poetry]
-name = "AAA-Tokenomics"
+name = "AAA"
 version = "0.1.0"
-description = "Tokenomics Design for All Access Anonymous"
-authors = ["Daniel Ahn, Bhargav Kakadiya, Johann Suarez, Jake Cassani, Nicholas O'Kelley"]
+description = ""
+authors = ["Barghav Kakadiya, Daniel Ahn, Nicholas O'kelley, Jake Cassani, Johann Suarez"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 
-[tool.poetry.dev-dependencies]
-
 [tool.poetry.scripts]
+run = "aaa.main:run_sim"
+
+[tool.poetry.dev-dependencies]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
