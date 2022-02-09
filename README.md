@@ -1,5 +1,4 @@
 # AAA tokenomics
-[![GitHub Super-Linter](https://github.com/longtailfinancial/aaa-tokenomics/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
 Modelling tokenomics similar to https://fantohm.com/ for our use case.
 
