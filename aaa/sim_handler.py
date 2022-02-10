@@ -30,6 +30,30 @@ class SimHandler:
         if not config:
             self.config: dict = Config.sim_confs
 
+    def seating_distributor(self) -> List[int]:
+        """
+        Distribution won't be equal, just like in real life.
+        And we won't know how many destributions we'll get (various seating arrangements)
+        What about a Fibonacci sequence?
+
+        Start from the 3rd digit.
+
+        0,1,1,2,3,5,8,13,21
+        """
+        distribution_nos: int = 7
+
+        # Recursive Fibonnaci
+        def fibonnaci_of(n: int):
+            if n in {0, 1}:
+                return n
+            return fibonnaci_of(n - 1) + fibonnaci_of(n - 2)
+
+
+        distribution_allocations: List[int] = [fibonnaci_of(n) for n in range(distribution_nos)]
+
+        return distribution_allocations
+
+
     def prepare_attendees(self, player_count: int):
         return [ Attendee() for _ in range(player_count) ]
 
@@ -39,8 +63,8 @@ class SimHandler:
 
         for _ in range(self.config["days"]):
             Temporal.elapse_day()
-            #Log.debug("Hmm")
 
         #print(attendees)
+        print(self.seating_distributor())
 
 

@@ -7,8 +7,10 @@ class Attendee(Temporal):
     attendee_instances: List = []
 
 
-    def __init__(self, received_conf: Dict = {}):
+    def __init__(self, received_conf: Dict = {},
+                       seating_tier: int = 0):
         super().__init__()
+        self.seating_tier = seating_tier
         self.USDC_balance: float = 10
         self.ticket: List = []
         self.id: int = Attendee.inst_count
@@ -32,7 +34,7 @@ class Attendee(Temporal):
         day_assess contains the daily responsibilities
         assigned to each instance of this class.
         '''
-        self.USDC_balance += 2
+        pass
 
 
     @property
