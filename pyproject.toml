@@ -16,6 +16,8 @@ sphinx-rtd-theme = "^1.0.0"
 
 [tool.poetry.scripts]
 run = "aaa.main:run_sim"
+pylint = "scripts.scripts:run_pylint"
+pytest = "scripts.scripts:run_pytest"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
