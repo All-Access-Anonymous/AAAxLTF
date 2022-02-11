@@ -11,6 +11,8 @@ numpy = "^1.22.2"
 colorama = "^0.4.4"
 colorlog = "^6.6.0"
 pydantic = "^1.9.0"
+Sphinx = "^4.4.0"
+sphinx-rtd-theme = "^1.0.0"
 
 [tool.poetry.scripts]
 run = "aaa.main:run_sim"
