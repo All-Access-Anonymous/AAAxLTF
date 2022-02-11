@@ -19,6 +19,7 @@ run = "aaa.main:run_sim"
 flake8 = "^4.0.1"
 pytest = "^7.0.0"
 python-dotenv = "^0.19.2"
+autopep8 = "^1.6.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

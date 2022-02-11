@@ -21,7 +21,7 @@ class Attendee(Temporal):
 
 
     def __repr__(self):
-        return f'ATTN-{self.id}-{self.USDC_balance}'
+        return f'ATTN-{self.id}-{self.seating_tier}'
 
 
     def day_pass(self) -> None:
