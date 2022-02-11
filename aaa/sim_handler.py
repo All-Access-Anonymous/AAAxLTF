@@ -21,7 +21,7 @@ class SimHandler:
     """
 
     def __init__(self, configs: dict = {}):
-        self.configs: dict = self.load_config(configs)
+        self.configs: dict | None = self.load_config(configs)
 
     def load_config(self, config: dict) -> None:
         """
