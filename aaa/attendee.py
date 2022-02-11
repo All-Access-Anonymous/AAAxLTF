@@ -53,3 +53,5 @@ class Attendee(Temporal):
         """
         return self._days_elapsed
 
+    def predecide_buy_day(self) -> int:
+        pass
