@@ -21,23 +21,35 @@ class Attendee(Temporal):
 
 
     def __repr__(self):
+        """
+        String representation when evaluated.
+        """
         return f'ATTN-{self.id}-{self.seating_tier}'
 
 
     def day_pass(self) -> None:
+        """
+        Inherited from Temporal ABC
+        This will be called by Temporal to initiate
+        this instance's daily routines / responsibilities.
+        """
         self._days_elapsed += 1
         self.day_assess()
 
 
     def day_assess(self) -> None:
-        '''
+        """
         day_assess contains the daily responsibilities
         assigned to each instance of this class.
-        '''
+        """
         pass
-
 
     @property
     def days_elapsed(self) -> int | None:
+        """
+        Inherited from Temporal ABC.
+        Returns the days elapsed for this object but
+        without needing to call this as a function.
+        """
         return self._days_elapsed
 

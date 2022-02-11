@@ -35,16 +35,15 @@ class SimHandler:
     def fibonnaci_of(n: int):
         """
         Recursive Fibonnaci, a helper method for
-        seating disributor
+        seating disributor.
         """
         if n in {0, 1}:
             return n
         return SimHandler.fibonnaci_of(n - 1) + SimHandler.fibonnaci_of(n - 2)
 
-
     def fix_rounding_imprecision(self, seating_allocations: List[int]) -> List[int]:
         """
-        When building the discrete seating allocations (how many peeople per seating level),
+        When building the discrete seating allocations (how many people per seating level),
         we may get extra or missing people in the allocations that makes their sum
         unequal with config['attendee_count']. This method adds back what's missing or
         negates any extras, and then gives back the fixed list of seating allocations.
@@ -52,18 +51,16 @@ class SimHandler:
 
         alloc_sum = sum(seating_allocations)
 
-        if  alloc_sum > self.config['attendee_count']:
-            seating_allocations[0] -= alloc_sum - self.config['attendee_count']
+        if alloc_sum > self.config["attendee_count"]:
+            seating_allocations[0] -= alloc_sum - self.config["attendee_count"]
             return seating_allocations
-        elif alloc_sum < self.config['attendee_count']:
-            seating_allocations[0] += self.config['attendee_count'] - alloc_sum
+        elif alloc_sum < self.config["attendee_count"]:
+            seating_allocations[0] += self.config["attendee_count"] - alloc_sum
             return seating_allocations
 
         return seating_allocations
 
-
-    def seating_distributor(self, distributions: int,
-                                  attendee_count: int) -> List[int]:
+    def seating_distributor(self, distributions: int, attendee_count: int) -> List[int]:
         """
         The seating distribution follows a Fibonnaci sequence pattern that
         starts from the third digit.
@@ -105,29 +102,33 @@ class SimHandler:
         distribution_nos: int = distributions
 
         distribution_allocations: List[int] = [
-            SimHandler.fibonnaci_of(n) for n in range(distribution_nos + 2)]
+            SimHandler.fibonnaci_of(n) for n in range(distribution_nos + 2)
+        ]
         distribution_allocations = distribution_allocations[-distribution_nos:]
         distribution_allocations.reverse()
         distribution_sum: int = sum(distribution_allocations)
 
         seating_allocations: List[float] | List[int] = [
-            round((i / distribution_sum), 4) for i in distribution_allocations]
+            round((i / distribution_sum), 4) for i in distribution_allocations
+        ]
 
-        discrete_allocations = [int(self.config['attendee_count'] * i) for i in seating_allocations]
-        seating_allocations = self.fix_rounding_imprecision(discrete_allocations)
+        discrete_allocations = [
+            int(self.config["attendee_count"] * i) for i in seating_allocations
+        ]
+        seating_allocations = self.fix_rounding_imprecision(
+            discrete_allocations)
 
         return seating_allocations
-
-
 
     def prepare_attendees(self, player_count: int):
         """
         Instantiating the attendees based on their Seat level.
         """
 
-        seating_tiers: int = self.config['seating_levels']
+        seating_tiers: int = self.config["seating_levels"]
         seating_distribution: List[int] = self.seating_distributor(
-            seating_tiers, player_count)
+            seating_tiers, player_count
+        )
 
         attendees: List[Attendee] = []
 
@@ -136,16 +137,22 @@ class SimHandler:
             seating_tier_number: int = seating_tiers - index
 
             for _ in range(seat_tier):
-                #print(f"Instantiated Attendee with Tier {seating_tier_number}")
+                # print(f"Instantiated Attendee with Tier {seating_tier_number}")
                 attendees.append(Attendee(seating_tier=seating_tier_number))
-
 
         return attendees
 
     def run(self) -> None | dict:
+        """
+        Sets the stage for the simulation by instantiating all
+        necessary objects / agents, and then runs the simulation.
+
+        :rtype: dict
+        """
 
         attendees: List[Attendee] = self.prepare_attendees(
-            self.config['attendee_count'])
+            self.config["attendee_count"]
+        )
 
         for _ in range(self.config["days"]):
             Temporal.elapse_day()
