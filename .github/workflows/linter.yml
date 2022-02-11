@@ -54,6 +54,4 @@ jobs:
           DEFAULT_BRANCH: main 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_PYTHON: true
-          VALIDATE_PYTHON_FLAKE8: true
-          VALIDATE_GITLEAKS: true
           FILTER_REGEX_INCLUDE: .*aaa/.*
