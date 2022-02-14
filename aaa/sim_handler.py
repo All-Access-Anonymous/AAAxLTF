@@ -4,6 +4,12 @@ from aaa.attendee import Attendee
 from aaa.temporal import Temporal
 from aaa.logger import pkg_logger as pl
 
+'''
+from aaa import Config
+from attendee import Attendee
+from temporal import Temporal
+from logger import pkg_logger as pl
+'''
 Log = pl.Logger().get_logger()
 
 
@@ -44,9 +50,10 @@ class SimHandler:
     def fix_rounding_imprecision(self, seating_allocations: List[int]) -> List[int]:
         """
         When building the discrete seating allocations (how many people per seating level),
-        we may get extra or missing people in the allocations that makes their sum
-        unequal with config['attendee_count']. This method adds back what's missing or
-        negates any extras, and then gives back the fixed list of seating allocations.
+        as a result of rounding floats we may get extra or missing people in the allocations
+        that makes their sum unequal with config['attendee_count'].
+        This method adds back what's missing or negates any extras, and then gives
+        back the fixed list of seating allocations.
         """
 
         alloc_sum = sum(seating_allocations)

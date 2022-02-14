@@ -1,0 +1,27 @@
+|------=| Feb 14, 2022 |=------|
+
+On starting Attendee behaviour:
+
+	Each player is assigned a pre-determined "buy" date
+	So we don't have to waste CPU resources rolling a dice for them
+	every time they go through their individual "day_assess".
+	This also guarantees each Attendee will eventually buy,
+	and not just leave it to a tweakable likelihood with no guarantees.
+
+	Since sim_handler is in charge of instantiating all attendees
+	based on received configurations, we'll also assign the "buy"
+	date of each Attendee there.
+
+	The logic for determining the buy date for each and every Attendee is
+	as follows:
+
+	ticket_sale_duration: int
+
+	Let SimHandler receive the config parameter called "ticket_sale_duration"
+	( Wait a sec, I think I can further enhance it by following a random normal distribution )
+	Ticket sales are random but they're not that sporadic. There will be a section
+	around the timeframe where the majority of the people buy.
+
+
+
+	

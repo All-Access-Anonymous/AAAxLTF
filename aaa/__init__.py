@@ -2,7 +2,7 @@ from typing import Dict, Any
 from pathlib import Path
 from threading import Lock
 from dotenv import dotenv_values
-from aaa.config import sim_conf
+from aaa.schema import SimConfig
 import sys
 
 class ThreadSafeSingleton(type):
@@ -30,7 +30,8 @@ class Config(metaclass=ThreadSafeSingleton):
         simulator can be used after pip installing.
         '''
         #__config: Dict[str, Any] = dotenv_values('.env')
-        __sim_confs: Dict[str, Any] = sim_conf
+        #__sim_confs: Dict[str, Any] = sim_conf
+        __sim_confs: Dict[str, Any] = schema.SimConfig().dict()
         __version  = "1.0.0"
         __package: str = __package__
         __base_dir = str(Path(__file__).resolve(strict=True).parent.parent)
@@ -68,7 +69,7 @@ class Config(metaclass=ThreadSafeSingleton):
 
     @classmethod
     @property
-    def config_dir(cls) -> str:
+    def config_dir(cls) -> Path:
         return cls.__config_dir
 
     @classmethod

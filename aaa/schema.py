@@ -10,6 +10,3 @@ class SimConfig(BaseModel):
     attendee_count: int = 50
     attendee_config: AttendeeConfig = AttendeeConfig()
     seating_levels: int = 5
-
-#sc = SimConfig()
-#print(sc.dict())

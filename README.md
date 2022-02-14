@@ -39,14 +39,9 @@ https://forum.olympusdao.finance/d/77-oip-18-reward-rate-framework-and-reduction
 ## Requirements:
 Python >= 3.10  
 [Virtualfish](https://virtualfish.readthedocs.io/en/latest/install.html)  
-[Poetry](https://python-poetry.org/)  
 
 ## Installation: 
-[Read the docs](https://python-poetry.org/docs/) to install poetry
 ```
-# Project installation
-$ poetry install
-
 # Start new virtual fish environment (you can replace 'AAA' into something you prefer)
 $ vf new AAA
 
@@ -54,7 +49,7 @@ $ vf new AAA
 $ vf activate AAA
 
 # Run the project
-$ poetry run run
+$ python -m aaa.[the_main_module]
 ```
 
 ## Progress:
