@@ -57,3 +57,17 @@ $ python -m aaa.[the_main_module]
 - [ ] Add dynamic simulation state configuration (seats tiers, ticket price increase and purchase probability)
 - [ ] Bring back Github Actions with better code linter
 - [x] Build the skeleton of the simulation (concert attendee and market)
+
+## Warning:
+
+There is currently an issue with pip's format when doing "pip freeze".
+Refer to this thread:
+
+https://stackoverflow.com/questions/62885911/pip-freeze-creates-some-weird-path-instead-of-the-package-version
+
+Solution is to simply use:
+```
+pip list --format=freeze > requirements.txt
+```
+
+instead of pip freeze.
