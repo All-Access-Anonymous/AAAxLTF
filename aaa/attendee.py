@@ -36,7 +36,6 @@ class Attendee(Temporal):
         self._days_elapsed += 1
         self.day_assess()
 
-
     def day_assess(self) -> None:
         """
         day_assess contains the daily responsibilities

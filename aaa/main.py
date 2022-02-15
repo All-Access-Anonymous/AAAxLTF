@@ -14,3 +14,7 @@ def run_sim(configs: dict = {}) -> Any:
     sim = SimHandler()
 
     sim.run()
+
+if __name__ == "__main__":
+    run_sim()
+

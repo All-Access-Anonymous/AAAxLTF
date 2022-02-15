@@ -3,10 +3,11 @@
 On starting Attendee behaviour:
 
 	Each player is assigned a pre-determined "buy" date
-	So we don't have to waste CPU resources rolling a dice for them
-	every time they go through their individual "day_assess".
-	This also guarantees each Attendee will eventually buy,
-	and not just leave it to a tweakable likelihood with no guarantees.
+	So we don't have to waste CPU resources rolling a dice
+	for them to check if they'll buy every time they go through 
+	their individual "day_assess". This also guarantees each 
+	Attendee will eventually buy, and not just leave it to a
+	tweakable likelihood with no guarantees.
 
 	Since sim_handler is in charge of instantiating all attendees
 	based on received configurations, we'll also assign the "buy"
@@ -18,10 +19,17 @@ On starting Attendee behaviour:
 	ticket_sale_duration: int
 
 	Let SimHandler receive the config parameter called "ticket_sale_duration"
-	( Wait a sec, I think I can further enhance it by following a random normal distribution )
+	( Wait a sec, I think I can further enhance it by following a distribution. I don't know
+	which type yet. )
 	Ticket sales are random but they're not that sporadic. There will be a section
 	around the timeframe where the majority of the people buy.
 
+	This calls for a truncated normal distribution. Akin to plotting the height 
+	of a general population, the majority will localize to a region in the middle, 
+	as there are few very extremely short people and very few tall people.
 
+	There will be very few people still willing to buy a ticket at the final day of sale,
+	when the ticket is at its highest price. The majority will be somewhere around the beginning,
+	some will be in the middle, and the numbers continue to taper off to the end.
 
-	
+	GRAB HELP FROM NICK NOW.
