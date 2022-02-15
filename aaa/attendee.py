@@ -39,7 +39,7 @@ class Attendee(Temporal):
         self.day_assess()
 
     def buy_ticket(self) -> None:
-        self.ticket.append("N-word Pass")
+        self.ticket.append("Tickeet")
 
     def day_assess(self) -> None:
         """
