@@ -33,3 +33,10 @@ On starting Attendee behaviour:
 	some will be in the middle, and the numbers continue to taper off to the end.
 
 	GRAB HELP FROM NICK NOW.
+
+
+|------=| Feb 15, 2022 |=------|
+
+Allocate task of developing probability distribution function to Nick.
+Assist BK.
+

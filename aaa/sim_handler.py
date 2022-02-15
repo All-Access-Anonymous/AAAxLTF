@@ -5,6 +5,7 @@ from aaa.temporal import Temporal
 from aaa.logger import pkg_logger as pl
 
 import scipy.stats as stats
+import numpy as np
 
 '''
 from aaa import Config
@@ -31,7 +32,6 @@ class SimHandler:
     def __init__(self, configs: dict = {}):
         self.configs: dict | None = self.load_config(configs)
 
-
     def load_config(self, config: dict) -> None:
         """
         If no configuration was provided, we source a
@@ -40,16 +40,26 @@ class SimHandler:
         if not config:
             self.config: dict = Config.sim_confs
 
+    @staticmethod
+    def rand_chance(low: float = 0, high: float = 1) -> float:
+        '''
+        Random number generator, then bounded and rounded.
+        '''
+        randnum = np.random.uniform(low, high)
+        return round(randnum, 2)
 
+    '''
     def generate_buy_dates(self, lower: int, upper: int, mean: int,
                             standard_deviation: int) -> List[int]:
 
-        buy_dates = stats.truncnorm(
-            (lower - mean) / standard_deviation, (upper - mean) / standard_deviation,
-            loc = mean, scale=standard_deviation)
 
         return [2,4]
+    '''
 
+    def generate_buy_days(self):
+        ls: List[int] = [int(SimHandler.rand_chance(
+            1, self.config['days'])) for _ in range(self.config['attendee_count'])]
+        return ls
 
     @staticmethod
     def fibonnaci_of(n: int):
@@ -60,7 +70,6 @@ class SimHandler:
         if n in {0, 1}:
             return n
         return SimHandler.fibonnaci_of(n - 1) + SimHandler.fibonnaci_of(n - 2)
-
 
     def fix_rounding_imprecision(self, seating_allocations: List[int]) -> List[int]:
         """
@@ -81,7 +90,6 @@ class SimHandler:
             return seating_allocations
 
         return seating_allocations
-
 
     def seating_distributor(self, distributions: int, attendee_count: int) -> List[int]:
         """
@@ -124,7 +132,6 @@ class SimHandler:
 
         distribution_nos: int = max(1, distributions)
 
-
         distribution_allocations: List[int] = [
             SimHandler.fibonnaci_of(n) for n in range(distribution_nos + 2)
         ]
@@ -144,7 +151,6 @@ class SimHandler:
 
         return seating_allocations
 
-
     def prepare_attendees(self, player_count: int):
         """
         Instantiating the attendees based on their Seat level.
@@ -155,6 +161,7 @@ class SimHandler:
             seating_tiers, player_count
         )
 
+        buy_days: List[int] = self.generate_buy_days()
         attendees: List[Attendee] = []
 
         for index, seat_tier in enumerate(seating_distribution):
@@ -162,11 +169,10 @@ class SimHandler:
             seating_tier_number: int = seating_tiers - index
 
             for _ in range(seat_tier):
-                # print(f"Instantiated Attendee with Tier {seating_tier_number}")
-                attendees.append(Attendee(seating_tier=seating_tier_number))
+                attendees.append(
+                    Attendee(seating_tier=seating_tier_number, buy_day=buy_days.pop()))
 
         return attendees
-
 
     def run(self) -> None | dict:
         """
@@ -182,5 +188,6 @@ class SimHandler:
 
         for _ in range(self.config["days"]):
             Temporal.elapse_day()
+
 
         print(attendees)

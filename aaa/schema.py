@@ -11,10 +11,19 @@ class SimConfig(BaseModel):
     attendee_count: int = 50
     attendee_config: AttendeeConfig = AttendeeConfig()
 
-    seating_levels: int = -5
+    seating_levels: int = 5
 
-    @validator('days', 'attendee_count', 'seating_levels', always=True)
-    def check_non_negative_vars(cls, v):
-        if v <= 0:
-            raise ValueError(
-                'Negative or 0 value amongst days, attendee_count, or seating_levels')
+    @validator('days', always=True)
+    def check_day_input(cls, v):
+        assert isinstance(v, int) and v >= 1
+        return v
+
+    @validator('attendee_count', always=True)
+    def check_attendee_count_input(cls, v):
+        assert isinstance(v, int) and v >= 50
+        return v
+
+    @validator('seating_levels', always=True)
+    def check_seating_levels_input(cls, v):
+        assert isinstance(v, int) and v >= 0
+        return v
