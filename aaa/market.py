@@ -2,22 +2,26 @@ from aaa.temporal import Temporal
 
 class Market(Temporal):
 
-    def __init__(self) -> None:
+    def __init__(self, seating_levels: int) -> None:
         super().__init__()
 
         # Configurables
-        self.base_ticket_price: float = 200
+        self.base_ticket_price: float = 50
         self.tier_multiplier: float = 1.5
 
         # States
-        self.ticket_registry: dict = self.prepare_ticket_registry()
+        self.ticket_registry: dict = self.prepare_ticket_registry(seating_levels)
         self.USDC_received: float = 0
         self._days_elapsed: int = 0
 
     def __repr__(self) -> str:
-        return f'MAR - {self.ticket_registry} - {self.USDC_received}'
+        '''
+        A convoluted REPR repr because I really want
+        the market results to print beautifully.
+        '''
+        return f'MAR - {self.ticket_registry} - ${self.USDC_received}'
 
-    def prepare_ticket_registry(self) -> dict:
+    def prepare_ticket_registry(self, seating_levels) -> dict:
         '''
         Before the market is able to accept any transactions
         and record the purchases to ticket registry,
@@ -26,13 +30,11 @@ class Market(Temporal):
         ticket registry.
         '''
 
-        return {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-        }
+        registry_dict: dict = {}
+        for i in range(seating_levels):
+            registry_dict[i + 1] = {'Quantities Sold': 0, 'USDC Received': 0}
+
+        return registry_dict
 
     @property
     def days_elapsed(self) -> int:
@@ -50,9 +52,6 @@ class Market(Temporal):
         self._days_elapsed += 1
 
     def log_day(self) -> None:
-        '''
-        Inherited from Temporal
-        '''
         pass
 
     def ticket_price_query(self, tier: int) -> float:
@@ -69,5 +68,7 @@ class Market(Temporal):
         containing the Ticket's tier and payment amount.
         USDC earned and tickets sold for that tier is updated.
         '''
-        self.USDC_received += payment['Payment']
-        self.ticket_registry[payment['Tier']]  += 1
+        rounded: float = round(payment['Payment'])
+        self.USDC_received += rounded
+        self.ticket_registry[payment['Tier']]['Quantities Sold']  += 1
+        self.ticket_registry[payment['Tier']]['USDC Received']  += rounded

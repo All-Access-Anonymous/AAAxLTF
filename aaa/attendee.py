@@ -14,6 +14,7 @@ class Attendee(Temporal):
         super().__init__()
         self.seating_tier = seating_tier
         self.USDC_balance: float = 1000
+
         self.ticket: List = []
         self.id: int = Attendee.inst_count
         self.buy_day: int = buy_day
@@ -27,6 +28,7 @@ class Attendee(Temporal):
         String representation when evaluated.
         """
         return f'ATTN-{self.id}-{self.seating_tier}-{self.buy_day}-{self.ticket}'
+
 
     def day_pass(self) -> None:
         """

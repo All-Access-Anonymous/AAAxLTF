@@ -59,3 +59,5 @@ the revenue generated before a concert. Assume the player can afford it.
 I'll leave the Attendee with a USDC balance still existing, but it's neither checked
 as a prereq nor decremented during a transaction.
 
+Market now has registry containing how many Tickets of each tier has been sold.
+It will also contain how much profit is generated explicitly from each Tier.

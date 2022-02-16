@@ -31,7 +31,7 @@ class SimHandler:
         Instantiate Ticket Market, with varying prices based on Tier Partitions.
             For Series A - 1 Partition
             For Series AA - 3 Partitions
-            For Series AA - 5-7 Partitions
+            For Series AAA - 5-7 Partitions
 
         Let ticket market take a JSON as configs for
         every object
@@ -248,11 +248,11 @@ class SimHandler:
             self.configs["attendee_count"]
         )
 
-        market = Market()
+        market = Market(self.configs["seating_levels"])
         med = Mediator(market, *attendees)
 
         for _ in range(self.configs["days"]):
             Temporal.elapse_day()
 
-        print(attendees)
+        #print(attendees)
         print(market)
