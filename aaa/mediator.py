@@ -51,8 +51,16 @@ class Mediator(BaseMediator):
         for attendee in self.colleague_list:
             attendee.mediator = self
 
-    def ticket_price_query(self) -> float:
-        return self.market.ticket_price_query()
+    def ticket_price_query(self, seating_tier: int) -> float:
+        '''
+        Invocation of the Market object's ticket
+        price query to send price information back to an Attendee.
+        '''
+        return self.market.ticket_price_query(seating_tier)
 
-    def purchase_ticket(self, payment: float) -> None:
+    def purchase_ticket(self, payment: dict) -> None:
+        '''
+        The player sends a signal to make a purchase,
+        Mediator invokes the Market's purchase_ticket() method.
+        '''
         self.market.purchase_ticket(payment)

@@ -254,4 +254,5 @@ class SimHandler:
         for _ in range(self.configs["days"]):
             Temporal.elapse_day()
 
+        print(attendees)
         print(market)
