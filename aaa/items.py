@@ -1,1 +1,1 @@
-Items: dict = { 1: ["Ticket", 200] }
+Items: dict = {1: ["Ticket", 200]}

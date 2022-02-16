@@ -12,7 +12,7 @@ class Attendee(Temporal):
                        seating_tier: int = 0):
         super().__init__()
         self.seating_tier = seating_tier
-        self.USDC_balance: float = 10
+        self.USDC_balance: float = 1000
         self.ticket: List = []
         self.id: int = Attendee.inst_count
         self.buy_day: int = buy_day
@@ -39,7 +39,15 @@ class Attendee(Temporal):
         self.day_assess()
 
     def buy_ticket(self) -> None:
-        self.ticket.append("Tickeet")
+        ticket_cost: float = self.mediator.ticket_price_query() # type: ignore (Runtime attribute)
+
+        if self.USDC_balance >= ticket_cost:
+            self.mediator.purchase_ticket(ticket_cost)          # type: ignore (Runtime attribute)
+            self.USDC_balance -= ticket_cost
+            self.ticket.append("Ticket")
+        else:
+            print(f"{self} can't afford {ticket_cost} ")
+
 
     def day_assess(self) -> None:
         """
@@ -47,7 +55,6 @@ class Attendee(Temporal):
         assigned to each instance of this class.
         """
         if self.buy_day == self.days_elapsed:
-            print(f'{self} bought on his buying day')
             self.buy_ticket()
 
     @property

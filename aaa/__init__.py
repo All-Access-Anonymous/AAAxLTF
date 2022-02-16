@@ -31,7 +31,7 @@ class Config(metaclass=ThreadSafeSingleton):
         '''
         #__config: Dict[str, Any] = dotenv_values('.env')
         #__sim_confs: Dict[str, Any] = sim_conf
-        __sim_confs: Dict[str, Any] = schema.SimConfig().dict()
+        __sim_confs: Dict[str, Any] = SimConfig().dict()
         __version  = "1.0.0"
         __package: str = __package__
         __base_dir = str(Path(__file__).resolve(strict=True).parent.parent)
@@ -64,8 +64,7 @@ class Config(metaclass=ThreadSafeSingleton):
 
     @classmethod
     @property
-    def logfile_name(cls) -> str:
-        return cls.__logfile_name
+    def logfile_name(cls) -> str: return cls.__logfile_name
 
     @classmethod
     @property

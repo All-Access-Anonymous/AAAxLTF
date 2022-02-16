@@ -40,4 +40,9 @@ On starting Attendee behaviour:
 Allocate task of developing probability distribution function to Nick.
 Assist BK.
 
-NICK DELIVERED! LOVE U NICK.
+NICK DELIVERED!
+
+Integrating his function into SimHandler.
+buy_day_generator's functions has been loaded with doc strings.
+
+EDIT: It's not it.. Back to the drawing board.

@@ -1,11 +1,19 @@
 from typing import List
 from aaa import Config
 from aaa.attendee import Attendee
+from aaa.market import Market
 from aaa.temporal import Temporal
 from aaa.logger import pkg_logger as pl
+from aaa.mediator import Mediator
 
-import scipy.stats as stats
 import numpy as np
+import random
+
+'''
+ON HOLD
+import matplotlib.pyplot as plt
+from scipy.stats import norm, skewnorm
+'''
 
 '''
 from aaa import Config
@@ -30,15 +38,20 @@ class SimHandler:
     """
 
     def __init__(self, configs: dict = {}):
-        self.configs: dict | None = self.load_config(configs)
 
-    def load_config(self, config: dict) -> None:
+        self.configs: dict = configs | self.load_config(configs)
+        self.buy_days: List[int] =  self.generate_buy_days(self.configs['attendee_count'],
+                                                           self.configs['days'])
+
+
+    def load_config(self, config: dict) -> dict:
         """
         If no configuration was provided, we source a
         default
         """
-        if not config:
-            self.config: dict = Config.sim_confs
+        return Config.sim_confs
+
+
 
     @staticmethod
     def rand_chance(low: float = 0, high: float = 1) -> float:
@@ -47,19 +60,6 @@ class SimHandler:
         '''
         randnum = np.random.uniform(low, high)
         return round(randnum, 2)
-
-    '''
-    def generate_buy_dates(self, lower: int, upper: int, mean: int,
-                            standard_deviation: int) -> List[int]:
-
-
-        return [2,4]
-    '''
-
-    def generate_buy_days(self):
-        ls: List[int] = [int(SimHandler.rand_chance(
-            1, self.config['days'])) for _ in range(self.config['attendee_count'])]
-        return ls
 
     @staticmethod
     def fibonnaci_of(n: int):
@@ -70,6 +70,64 @@ class SimHandler:
         if n in {0, 1}:
             return n
         return SimHandler.fibonnaci_of(n - 1) + SimHandler.fibonnaci_of(n - 2)
+
+    @staticmethod
+    def reduce(sample: np.ndarray, count: int) -> List[float]:
+        '''
+        The z list from generate_buy_days() will have too many points (intended).
+        One point for each person in the population is needed.
+        The range has to be the same but not as many elements.
+
+        :param sample: The List of points from where we derive a buy_day for each Attendee.
+        :type sample: np.ndarray
+
+        :param count: To how many elements do we condense the sample of values.
+            Let it be an int (one for each person)
+        :type count: int
+        '''
+        indexed: List = [item for item in enumerate(sample)]
+        random.shuffle(indexed)
+        trimmed = indexed[:count]
+        trimmed.sort()
+        return [item for index, item in trimmed]
+
+    def generate_buy_days(self, *args):
+        ls: List[int] = [int(SimHandler.rand_chance(
+            1, self.configs['days'])) for _ in range(self.configs['attendee_count'])]
+        return ls
+
+    '''
+    def generate_buy_days(self, population: int,
+                                days_until_concert: int,
+                                granularity: float = 0.001) -> List[int]:
+        Very few people would wait until the very last day to buy a
+        ticket because it would be at its priciest. The majority of attendees
+        will buy a ticket around the 5-10 day mark. The distribution of the ticket sales.
+        by day wouldn't be uniform, just like how a population's height isn't.
+        There's an average.
+
+        :param population: Feed here the Attendee count.
+        :type population: int
+
+        :param days_until_concert: The number of days the ticket goes on sale.
+        :type days_until_concert: int
+
+        :param granularity: days_until_concert will be divided by granularity to determine resolution
+            of points the from 0 until days_until_concert. This is given a default value.
+        :type granularity: float
+
+        :return: The list of ints with each int representing the predetermined buy day of a person.
+        :rtype: List[int]
+
+        # Difficulty typehinting these. They're NDArrays.
+        x = np.arange(0, days_until_concert, granularity)
+        y = skewnorm.pdf(x, 5, 10, 15)
+        print(y)
+        z: List[float] = SimHandler.reduce(x, population)
+        z_rounded: List[int] = [max(1, round(i)) for i in z]
+
+        return z_rounded
+    '''
 
     def fix_rounding_imprecision(self, seating_allocations: List[int]) -> List[int]:
         """
@@ -82,11 +140,11 @@ class SimHandler:
 
         alloc_sum = sum(seating_allocations)
 
-        if alloc_sum > self.config["attendee_count"]:
-            seating_allocations[0] -= alloc_sum - self.config["attendee_count"]
+        if alloc_sum > self.configs["attendee_count"]:
+            seating_allocations[0] -= alloc_sum - self.configs["attendee_count"]
             return seating_allocations
-        elif alloc_sum < self.config["attendee_count"]:
-            seating_allocations[0] += self.config["attendee_count"] - alloc_sum
+        elif alloc_sum < self.configs["attendee_count"]:
+            seating_allocations[0] += self.configs["attendee_count"] - alloc_sum
             return seating_allocations
 
         return seating_allocations
@@ -144,7 +202,7 @@ class SimHandler:
         ]
 
         discrete_allocations = [
-            int(self.config["attendee_count"] * i) for i in seating_allocations
+            int(attendee_count * i) for i in seating_allocations
         ]
         seating_allocations = self.fix_rounding_imprecision(
             discrete_allocations)
@@ -156,12 +214,12 @@ class SimHandler:
         Instantiating the attendees based on their Seat level.
         """
 
-        seating_tiers: int = self.config["seating_levels"]
+        seating_tiers: int = self.configs["seating_levels"]
         seating_distribution: List[int] = self.seating_distributor(
             seating_tiers, player_count
         )
 
-        buy_days: List[int] = self.generate_buy_days()
+        buy_days: List[int] = self.buy_days
         attendees: List[Attendee] = []
 
         for index, seat_tier in enumerate(seating_distribution):
@@ -174,6 +232,10 @@ class SimHandler:
 
         return attendees
 
+    def diagnostics(self) -> None:
+        pass
+
+
     def run(self) -> None | dict:
         """
         Sets the stage for the simulation by instantiating all
@@ -183,11 +245,13 @@ class SimHandler:
         """
 
         attendees: List[Attendee] = self.prepare_attendees(
-            self.config["attendee_count"]
+            self.configs["attendee_count"]
         )
 
-        for _ in range(self.config["days"]):
+        market = Market()
+        med = Mediator(market, *attendees)
+
+        for _ in range(self.configs["days"]):
             Temporal.elapse_day()
 
-
-        print(attendees)
+        print(market)
