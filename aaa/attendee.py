@@ -39,15 +39,20 @@ class Attendee(Temporal):
         self.day_assess()
 
     def buy_ticket(self) -> None:
-        ticket_cost: float = self.mediator.ticket_price_query() # type: ignore (Runtime attribute)
 
+        ticket_cost: float = self.mediator.ticket_price_query() # type: ignore (Runtime attribute)
+        self.mediator.purchase_ticket(ticket_cost)              # type: ignore (Runtime attribute)
+        # self.USDC_balance -= ticket_cost
+        self.ticket.append("Ticket")
+
+        '''
         if self.USDC_balance >= ticket_cost:
             self.mediator.purchase_ticket(ticket_cost)          # type: ignore (Runtime attribute)
             self.USDC_balance -= ticket_cost
             self.ticket.append("Ticket")
         else:
             print(f"{self} can't afford {ticket_cost} ")
-
+        '''
 
     def day_assess(self) -> None:
         """
@@ -65,5 +70,3 @@ class Attendee(Temporal):
         without needing to call this as a function.
         """
         return self._days_elapsed
-
-

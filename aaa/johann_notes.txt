@@ -46,3 +46,16 @@ Integrating his function into SimHandler.
 buy_day_generator's functions has been loaded with doc strings.
 
 EDIT: It's not it.. Back to the drawing board.
+
+
+|------=| Feb 16, 2022 |=------|
+
+Fixing Ticket Price increase. It increases on each passing day, not after
+each transaction. Done.
+
+Don't give attendee a starting balance. The idea of the simulation is to observe
+the revenue generated before a concert. Assume the player can afford it.
+
+I'll leave the Attendee with a USDC balance still existing, but it's neither checked
+as a prereq nor decremented during a transaction.
+
