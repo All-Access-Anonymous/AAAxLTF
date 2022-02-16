@@ -7,19 +7,16 @@ class Market(Temporal):
 
         # Configurables
         self.base_ticket_price: float = 50
+        self.tiers: int = seating_levels
         self.tier_multiplier: float = 1.5
 
         # States
-        self.ticket_registry: dict = self.prepare_ticket_registry(seating_levels)
+        self.ticket_registry: dict = self.prepare_ticket_registry(self.tiers)
         self.USDC_received: float = 0
         self._days_elapsed: int = 0
 
     def __repr__(self) -> str:
-        '''
-        A convoluted REPR repr because I really want
-        the market results to print beautifully.
-        '''
-        return f'MAR - {self.ticket_registry} - ${self.USDC_received}'
+       return f'MAR - {self.ticket_registry} - ${self.USDC_received}'
 
     def prepare_ticket_registry(self, seating_levels) -> dict:
         '''
@@ -59,8 +56,20 @@ class Market(Temporal):
         Before a purchase, Attendees make a price query.
         The Market takes into account the Attendee's desired
         seating level / tier before sending back the price quote.
+
+        return is BASE_TICKET_PRICE * TIER_MULTIPIER ^ [TOTAL_TIERS - BUYER_TIER + 1]
+        ex:
+            For a Tier 5 buyer
+            cost = 50 * 1.5 ^ (5 - 5)
+                 = 50 * 1
+
+            For a Tier 1 buyer
+            cost = 50 * 1.5 ^ (5 - 1)
+                 = 50 * 1.5 ^ 4
+                 = 253.125
         '''
-        return self.base_ticket_price * self.tier_multiplier * tier
+
+        return self.base_ticket_price * self.tier_multiplier ** self.tiers - tier
 
     def purchase_ticket(self, payment: dict) -> None:
         '''

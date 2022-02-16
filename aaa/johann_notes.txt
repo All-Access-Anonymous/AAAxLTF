@@ -61,3 +61,9 @@ as a prereq nor decremented during a transaction.
 
 Market now has registry containing how many Tickets of each tier has been sold.
 It will also contain how much profit is generated explicitly from each Tier.
+
+Meeting with Jake, must implement these features/changes.
+
+2. Change how you dictate when the population buys a ticket. Right now it's COMPLETELY random.
+3. Give the tickets a more refined price adjustment as time passes, specifically the lower
+end tickets as the concert approaches.

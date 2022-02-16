@@ -8,7 +8,7 @@ class AttendeeConfig(BaseModel):
 
 class SimConfig(BaseModel):
     days: int = 50
-    attendee_count: int = 50
+    attendee_count: int = 5000
     attendee_config: AttendeeConfig = AttendeeConfig()
 
     seating_levels: int = 5
