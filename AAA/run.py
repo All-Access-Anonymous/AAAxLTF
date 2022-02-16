@@ -16,7 +16,3 @@ s1 = Staked_AHM()
 s1.stake_AHM(u1, 20)
 
 print(User.all)
-print(id(User.all[0]))
-print(id(User.all[1]))
-print(id(User.all[2]))
-print(id(User.all[3]))

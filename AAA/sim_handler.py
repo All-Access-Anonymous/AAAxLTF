@@ -1,25 +1,48 @@
+## import class objects 
+from typing import List, Dict
+from AAA.user import User
+from AAA.bond import Bond
+from AAA.staked_AHM import Staked_AHM
+from AAA.config import sim_conf
+
 class SimHandler:
     """
     Responsiblities:
-        Instantiate Attender based on Series level (A, AA, AAA)
-        Instantiate Ticket Market, with varying prices based on Tier Partitions.
-            For Series A - 1 Partition
-            For Series AA - 3 Partitions
-            For Series AA - 5-7 Partitions
+        Instantiate Users
+        Instantiate 
 
-        Let ticket market take a JSON as configs for
-        every object
     """
 
     def __init__(self, configs: dict = {}):
-        self.config = self.load_config(configs)
-        self.market = None
+        # self.config = self.load_config(configs)
+        self.users = [] # all user objects
+        self.bonds = [] # all bond objects
+        self.staked_AHM = None # a staked_AHM object or Contract
 
-    @staticmethod
-    def load_config(config: dict):
-        if not config:
-            print("No config")
-        return {  }
+    def instantiate_Users(self, number: int = 4) -> None:
+        for i in range(number):
+            user = User(sim_conf)
+            self.users.append(user)
+        return None
 
-    def run(self) -> None | dict:
+    def instantiate_Staked_AHM(self) -> None:
+        self.staked_AHM = Staked_AHM()
+
+
+    def instantiate_Bonds(self, number: int = 4) -> None:
         pass
+
+    
+    def instantiate_Simulation(self) -> None:
+        self.instantiate_Users() # instantiate users and store in self.users
+        self.instantiate_Staked_AHM() # instantiated & stored in self.staked_AHM
+        self.staked_AHM.stake_AHM(self.users[0], 25)
+        self.staked_AHM.stake_AHM(self.users[1], 50)
+        self.staked_AHM.stake_AHM(self.users[2], 75)
+        self.staked_AHM.stake_AHM(self.users[3], 100)
+        return None
+
+    def run(self):
+        self.instantiate_Simulation()
+        # for i in range(10):
+        return None

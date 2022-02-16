@@ -1,4 +1,5 @@
 from typing import List, Dict
+import copy
 
 class User():
     """
@@ -9,14 +10,16 @@ class User():
         - stake AHM
 
     """
-    user_id: int = 1
+    instance_number: int = 1
     all: List = []
 
     def __init__(self, received_conf: Dict = {}):
-        self.balances: dict() = received_conf["user_config"]["balances"]
-        self.id: int = User.user_id
-
-        User.user_id += 1
+        self.balances: dict() = copy.deepcopy(received_conf["user_config"]["balances"])
+        ## WHY copy.deepcopy?
+        # https://stackoverflow.com/questions/47499998/modifying-dictionary-in-one-instance-of-a-class-makes-same-change-to-all-other-i
+        self.id: int = User.instance_number
+        
+        User.instance_number += 1
         User.all.append(self)
 
     # def buy_bond(self, asset: str, amount: int) -> None:
@@ -33,6 +36,23 @@ class User():
     #     Stake AHM to earn interest
     #     """
     #     pass
+
+    def sub_bal(self, asset: str, amount: int) -> None:
+        """
+        Subtract amount from asset
+        """
+        if self.balances[asset] >= amount:
+            self.balances[asset] -= amount
+        else:
+            raise Exception(f'Not enough {asset}')
+        return None
+
+    def add_bal(self, asset: str, amount: int) -> None:
+        """
+        Add amount to asset
+        """
+        self.balances[asset] += amount
+        return None
 
     def __repr__(self):
         return f'User-{self.id}: Bal={self.balances}'

@@ -8,7 +8,7 @@ sim_conf = {
 
         "balances":{
             'DAI': 1000,
-            'AHM': 20,
+            'AHM': 200,
             'sAHM': 0,
             'ETH': 1,
         }

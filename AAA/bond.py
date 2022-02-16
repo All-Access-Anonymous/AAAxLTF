@@ -12,20 +12,20 @@ class Bond():
     - maxDebt; // 9 decimal debt ratio, max % total supply created as debt
     """
     
-    bond_id: int = 0
+    instance_number: int = 1
     all: List = []
 
     def __init__(self, received_conf: Dict = {}):
-        self.control_varriable: int = 0.2
+        self.bond_control_variable: int = 0.2
         self.vesting_term: int = 5 #days; at least 36 hrs
         self.min_price: int = 0.8
         self.max_payout: int = 500 # 0.5% , can't be above 1%
         self.fee: int = 2 # % goes to AAA Treasury
         self.max_debt: int = 0.9
         self.asset_token = 'DAI'
-        
-        self.id: int = Bond.bond_id
-        Bond.bond_id += 1
+        self.is_Liquidity_Bond = False # true if LP bond
+        self.id: int = Bond.instance_number
+        Bond.instance_number += 1
         Bond.all.append(self)
 
     # Info for incremental adjustments to control variable 
@@ -45,6 +45,93 @@ class Bond():
         # uint vesting; // Blocks left to vest
         # uint lastBlock; // Last interaction
         # uint pricePaid; // In DAI, for front end viewing
+
+    def get_minimal_bond_price(self) -> int:
+        """
+        Calculate minimal bond price
+        Returns minimal bond price
+        """
+        market_price = self.get_market_price()
+        discount = market_price * self.maximum_discount
+        price = market_price - discount
+        if self.is_Liquidity_Bond:
+            return 99 ##
+        else:
+            return price
+
+
+    def calc_bond_price(self) -> int:
+        """
+        Calculate bond price to DAI Value
+        """
+        p = 1 + (self.bond_control_variable * self.debt_ratio())
+        if p < self.min_price:
+            p = self.min_price
+        elif p!=0:
+            self.min_price = 0
+        minimal_bond_price = self.get_minimal_bond_price()
+        if p < minimal_bond_price:
+            p = minimal_bond_price
+        return p
+
+    def bond_Price_in_USD(self) -> int:
+        """
+        Calculate bond price to DAI Value
+        """
+        if self.is_Liquidity_Bond:
+            return 99 ##
+        else:
+            return 99 ##
+
+    def debt_ratio(self) -> int:
+        """
+        Calculate current ratio of debt to FHM supply
+        Returns debt ratio
+        """
+        return self.current_debt() / self.total_supply()
+
+    def standardized_Debt_Ratio(self) -> int:
+        """
+        Calculate the debt ratio in same terms for reserve or liquidity bonds
+        Returns debt ratio
+        """
+        if is_Liquidity_Bond:
+            return self.debt_ratio() # **
+        else:
+            return self.debt_ratio()
+
+    def current_debt(self) -> int:
+        """
+        calculate debt factoring in decay
+        Returns int
+        """
+        # return total_debt - self.debt_decay()
+        pass
+
+    
+    def debt_decay(self) -> int:
+        """
+        amount to decay total debt by
+        Returns amount to decay
+        """
+        pass
+
+    def calc_percent_vested_for(self, userId: int) -> int:
+        """
+        calculate how far into vesting a depositor is
+        Returns percent vested
+        """
+        pass
+
+
+
+    def calc_pending_payout(self, userId: int) -> int:
+        """
+        Calculate amount of AHM available for claim by depositor
+        Returns pending payout AHM
+        """
+        pass
+
 
     def __repr__(self):
         return f'Bond-{self.asset_token}'
