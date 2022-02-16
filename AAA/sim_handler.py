@@ -36,13 +36,19 @@ class SimHandler:
     def instantiate_Simulation(self) -> None:
         self.instantiate_Users() # instantiate users and store in self.users
         self.instantiate_Staked_AHM() # instantiated & stored in self.staked_AHM
-        self.staked_AHM.stake_AHM(self.users[0], 25)
-        self.staked_AHM.stake_AHM(self.users[1], 50)
-        self.staked_AHM.stake_AHM(self.users[2], 75)
-        self.staked_AHM.stake_AHM(self.users[3], 100)
+        self.staked_AHM.stake_AHM(self.users[0], 50)
+        self.staked_AHM.stake_AHM(self.users[1], 100)
+        self.staked_AHM.stake_AHM(self.users[2], 100)
+        self.staked_AHM.stake_AHM(self.users[3], 200)
         return None
 
     def run(self):
         self.instantiate_Simulation()
-        # for i in range(10):
+        for i in range(10):
+            self.staked_AHM.add_interest_to_balances(interest_rate=1, users=self.users)
+            # print(self.users)
+
+        # Elaspse epochs 
+        # for _ in range(5):#self.configs["days"]
+        #     Temporal.elapse_epoch()
         return None

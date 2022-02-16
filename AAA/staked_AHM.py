@@ -1,6 +1,7 @@
 from typing import List, Dict
+from AAA.temporal import Temporal
 
-class Staked_AHM():
+class Staked_AHM(Temporal):
     """
 
     Is a staking contract where users can stake AHM to earn rebase rewards.
@@ -18,8 +19,9 @@ class Staked_AHM():
     all: List = []
 
     def __init__(self):
+        super().__init__()
         self.balances: dict = {} #to record all balances of sAHM
-
+        self._epochs_elapsed: int = 0 #For Sim
         #id management
         self.id: int = Staked_AHM.instance_number        
         Staked_AHM.instance_number += 1
@@ -70,3 +72,39 @@ class Staked_AHM():
 
     def __repr__(self):
         return f'staked_AHM-{self.id}: total sAHM ={self.get_total_sAHM()}'
+
+    def add_interest_to_balances(self, interest_rate: float, users:list) -> None:
+        """
+        Add interest to all sAHM in the contract
+        """
+        for k in self.balances.keys():
+            to_add = self.balances[k]['sAHM'] * interest_rate * 0.01
+            self.balances[k]['sAHM'] += to_add 
+            #update balances in user wallets
+            users[k-1].add_bal('sAHM', to_add)
+        return None
+
+    def run_epoch(self) -> None:
+        """
+        Inherited from Temporal ABC
+        This will be called by Temporal to initiate
+        this instance's daily routines / responsibilities.
+        """
+        self._epochs_elapsed += 1
+        self.epoch_assess()
+    
+    def epoch_assess(self) -> None:
+        """
+        day_assess contains the daily responsibilities
+        assigned to each instance of this class.
+        """
+        self.add_interest_to_balances(interest_rate=1)# 1 percent
+
+    @property
+    def epochs_elapsed(self):
+        """
+        Inherited from Temporal ABC.
+        Returns the days elapsed for this object but
+        without needing to call this as a function.
+        """
+        return self._epochs_elapsed
