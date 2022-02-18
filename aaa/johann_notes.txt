@@ -67,3 +67,19 @@ Meeting with Jake, must implement these features/changes.
 2. Change how you dictate when the population buys a ticket. Right now it's COMPLETELY random.
 3. Give the tickets a more refined price adjustment as time passes, specifically the lower
 end tickets as the concert approaches.
+
+
+|------=| Feb 18, 2022 |=------|
+
+Asking Dr. Penland for help on making the buy day distribution.
+
+Strategy: 
+Use 
+random.choices(population, weights=None, *, cum_weights=None, k=1) 
+to produce a range
+of ints but with the output influenced by a weight
+distribution.
+
+The current issue is dynamically producing the 
+list of weight distributions such that they always
+total to 1 despite a varying length of the population.

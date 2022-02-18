@@ -6,10 +6,15 @@ class AttendeeConfig(BaseModel):
     lateness: tuple[float, float] = (0.5, 0.9)
 
 
+class MarketConfig(BaseModel):
+    log_day: bool = True
+
+
 class SimConfig(BaseModel):
     days: int = 50
-    attendee_count: int = 5000
+    attendee_count: int = 50
     attendee_config: AttendeeConfig = AttendeeConfig()
+    market_config: MarketConfig = MarketConfig()
 
     seating_levels: int = 5
 

@@ -2,17 +2,20 @@ from aaa.temporal import Temporal
 
 class Market(Temporal):
 
-    def __init__(self, seating_levels: int) -> None:
+    def __init__(self, seating_levels: int,
+                       log_day: bool) -> None:
         super().__init__()
 
         # Configurables
         self.base_ticket_price: float = 50
         self.tiers: int = seating_levels
         self.tier_multiplier: float = 1.5
+        self.log_day: bool = log_day
 
         # States
         self.ticket_registry: dict = self.prepare_ticket_registry(self.tiers)
         self.USDC_received: float = 0
+        self.logs: List[List] = [[] for x in range(self.tiers)]
         self._days_elapsed: int = 0
 
     def __repr__(self) -> str:
@@ -44,11 +47,42 @@ class Market(Temporal):
         '''
         Inherited from Temporal
         '''
-
-        self.base_ticket_price *= 1.05
         self._days_elapsed += 1
+        self.day_assess()
 
-    def log_day(self) -> None:
+    def day_assess(self) -> None:
+        '''
+        day_assess contains the daily responsibilities
+        assigned to each instance of this class.
+        '''
+        self.base_ticket_price *= 1.05
+
+        if self.log_day:
+            self.daily_log()
+
+    def daily_log(self) -> None:
+        '''
+        What is there to log?
+        The state of the ticket_registry each day.
+        How would you save all this in dataframe form?
+
+        It's going to be n plots depending on how many tiers
+        there are. For each tier, the dataframe will look like this.
+        Overlay the plots, check source code from prior works.
+         _________________________________________
+        | Day | Quantities Sold | USDC Received   |
+         -----------------------------------------
+        | 1   | 14              |  $600           |
+        | 2   | 24              |  $900           |
+        | 3   | 27              |  $1053          |
+        | 4   | 35              |  $1332          |
+        | 5   | 45              |  $1643          |
+                    ...
+
+        The list for each Tier will
+
+        '''
+
         pass
 
     def ticket_price_query(self, tier: int) -> float:
@@ -68,7 +102,6 @@ class Market(Temporal):
                  = 50 * 1.5 ^ 4
                  = 253.125
         '''
-
         return self.base_ticket_price * self.tier_multiplier ** self.tiers - tier
 
     def purchase_ticket(self, payment: dict) -> None:

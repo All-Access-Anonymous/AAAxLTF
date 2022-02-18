@@ -9,18 +9,7 @@ from aaa.mediator import Mediator
 import numpy as np
 import random
 
-'''
-ON HOLD
-import matplotlib.pyplot as plt
-from scipy.stats import norm, skewnorm
-'''
 
-'''
-from aaa import Config
-from attendee import Attendee
-from temporal import Temporal
-from logger import pkg_logger as pl
-'''
 Log = pl.Logger().get_logger()
 
 
@@ -38,11 +27,9 @@ class SimHandler:
     """
 
     def __init__(self, configs: dict = {}):
-
         self.configs: dict = configs | self.load_config(configs)
         self.buy_days: List[int] =  self.generate_buy_days(self.configs['attendee_count'],
                                                            self.configs['days'])
-
 
     def load_config(self, config: dict) -> dict:
         """
@@ -50,8 +37,6 @@ class SimHandler:
         default
         """
         return Config.sim_confs
-
-
 
     @staticmethod
     def rand_chance(low: float = 0, high: float = 1) -> float:
@@ -248,11 +233,9 @@ class SimHandler:
             self.configs["attendee_count"]
         )
 
-        market = Market(self.configs["seating_levels"])
+        market = Market(self.configs["seating_levels"], self.configs['market_config']['log_day'])
         med = Mediator(market, *attendees)
 
         for _ in range(self.configs["days"]):
             Temporal.elapse_day()
 
-        #print(attendees)
-        print(market)
