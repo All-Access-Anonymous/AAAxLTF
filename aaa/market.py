@@ -1,4 +1,5 @@
 from aaa.temporal import Temporal
+from typing import List
 
 class Market(Temporal):
 
@@ -15,7 +16,7 @@ class Market(Temporal):
         # States
         self.ticket_registry: dict = self.prepare_ticket_registry(self.tiers)
         self.USDC_received: float = 0
-        self.logs: List[List] = [[] for x in range(self.tiers)]
+        self.logs: List[List] = [ [ [], [], [] ]  for x in range(self.tiers)]
         self._days_elapsed: int = 0
 
     def __repr__(self) -> str:
@@ -79,11 +80,17 @@ class Market(Temporal):
         | 5   | 45              |  $1643          |
                     ...
 
-        The list for each Tier will
+        The list for each Tier will will contain 3 sub-lists.
+        Think of these as the columns for the dataframe. There will be
+        one for the current day, one for the quantities sold,
+        one for the USDC received.
 
+        [ [ [], [], [] ] , [ [], [], [] ], [ [], [], [] ] ]
         '''
-
-        pass
+        for tier, _ in enumerate(self.logs):
+            self.logs[tier][0].append(self._days_elapsed) # Day index
+            self.logs[tier][1].append(self.ticket_registry[tier + 1]['Quantities Sold']) # Quantities index
+            self.logs[tier][2].append(self.ticket_registry[tier + 1]['USDC Received']) # USDC index
 
     def ticket_price_query(self, tier: int) -> float:
         '''

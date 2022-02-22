@@ -83,3 +83,5 @@ distribution.
 The current issue is dynamically producing the 
 list of weight distributions such that they always
 total to 1 despite a varying length of the population.
+
+We have a prototype function now. Thank you Dr. P!

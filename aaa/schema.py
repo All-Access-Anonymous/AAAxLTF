@@ -12,7 +12,7 @@ class MarketConfig(BaseModel):
 
 class SimConfig(BaseModel):
     days: int = 50
-    attendee_count: int = 50
+    attendee_count: int = 50000
     attendee_config: AttendeeConfig = AttendeeConfig()
     market_config: MarketConfig = MarketConfig()
 
