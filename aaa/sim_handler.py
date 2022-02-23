@@ -1,4 +1,5 @@
 from typing import List
+
 from aaa import Config
 from aaa.attendee import Attendee
 from aaa.market import Market
@@ -6,8 +7,10 @@ from aaa.temporal import Temporal
 from aaa.logger import pkg_logger as pl
 from aaa.mediator import Mediator
 
+import plotly.express as px
 import numpy as np
 import random
+import pwlf
 
 
 Log = pl.Logger().get_logger()
@@ -28,8 +31,8 @@ class SimHandler:
 
     def __init__(self, configs: dict = {}):
         self.configs: dict = configs | self.load_config(configs)
-        self.buy_days: List[int] =  self.generate_buy_days(self.configs['attendee_count'],
-                                                           self.configs['days'])
+        self.day_weights = self.buy_date_weights()
+        self.buy_days: List[int] =  self.generate_buy_days(self.day_weights)[1]
 
     def load_config(self, config: dict) -> dict:
         """
@@ -76,42 +79,85 @@ class SimHandler:
         trimmed.sort()
         return [item for index, item in trimmed]
 
+
+    def buy_date_weights(self) -> List[List]:
+        '''
+        :param days_range: The duration of the simulation in days.
+        :type days_range: int
+
+        :param weights: The weights for segments of the days_range
+        :type weights: List[float | int]
+        '''
+
+        weights_length: int = len(self.configs['buy_day_weights'])
+
+        day_segment: float  = self.configs['days'] / weights_length
+        day_partitions: List[int] = [0, *[int(day_segment * (i+1)) for i in range(weights_length)] ]
+        day_partitions.pop() # Pop off an extra element such that len(day_partitions) == len(weights)
+
+        return day_partitions
+
+    def generate_buy_days(self, day_partitions: List[int]) -> List[int]:
+        '''
+        Given a population, and day_range, we return a list of ints
+        that determine a buy date for each Attendee in the population
+        such that when plotted in a histogram, that comes from the
+        probability density suggested by the control points.
+
+        :param control_xy: Contains information that influences the buying
+        trend of the population buy specifying what days get the most/least purchases
+
+        :type control_xy: List[List]
+
+        :param population: How many people will be in the simulation
+        :type population: int
+
+        :return: A list containing the determined buy date for everyone in the population
+        :rtype: List[int]
+        '''
+        # Creating a Piecewise Linear Fit for the Points
+        # Let's use numpy and the pwlf package (pwlf stands for piecewise linear fit). 
+        # In general, we would want the x and y below to be control points that we 
+        # can adjust in fitting the distribution. 
+
+
+        # Small check, x and y should be same length
+        assert len(day_partitions) == len(self.configs['buy_day_weights'])
+        days: int = self.configs['days']
+
+        # x is day paritions
+        # y is day weights
+        x = np.array(day_partitions)
+        y = np.array(self.configs['buy_day_weights'])
+
+        my_pwlf = pwlf.PiecewiseLinFit(x, y)
+        breaks = my_pwlf.fit(len(x) - 1)
+
+        my_y_vals = [my_pwlf.predict(x)[0] for x in range(days)]
+        my_x_vals = range(days)
+
+        # Creating plot
+        fig_a = px.line(y = my_y_vals, x = my_x_vals)
+
+        # Normalizing 
+        my_weights = 1/sum(my_y_vals) * np.array(my_y_vals)
+
+        sample = random.choices(range(days),
+                                weights = my_weights,
+                                k = self.configs['attendee_count']) ## Sampling
+
+        result = px.histogram(sample, nbins = days)
+
+        # First return is the line plot
+        # Second return is the list of buy dates we'll actually use
+        # Third return is the bar plot of the frequency of buys by day
+        return fig_a, sample, result
+
+    '''
     def generate_buy_days(self, *args):
         ls: List[int] = [int(SimHandler.rand_chance(
             1, self.configs['days'])) for _ in range(self.configs['attendee_count'])]
         return ls
-
-    '''
-    def generate_buy_days(self, population: int,
-                                days_until_concert: int,
-                                granularity: float = 0.001) -> List[int]:
-        Very few people would wait until the very last day to buy a
-        ticket because it would be at its priciest. The majority of attendees
-        will buy a ticket around the 5-10 day mark. The distribution of the ticket sales.
-        by day wouldn't be uniform, just like how a population's height isn't.
-        There's an average.
-
-        :param population: Feed here the Attendee count.
-        :type population: int
-
-        :param days_until_concert: The number of days the ticket goes on sale.
-        :type days_until_concert: int
-
-        :param granularity: days_until_concert will be divided by granularity to determine resolution
-            of points the from 0 until days_until_concert. This is given a default value.
-        :type granularity: float
-
-        :return: The list of ints with each int representing the predetermined buy day of a person.
-        :rtype: List[int]
-
-        # Difficulty typehinting these. They're NDArrays.
-        x = np.arange(0, days_until_concert, granularity)
-        y = skewnorm.pdf(x, 5, 10, 15)
-        print(y)
-        z: List[float] = SimHandler.reduce(x, population)
-        z_rounded: List[int] = [max(1, round(i)) for i in z]
-
-        return z_rounded
     '''
 
     def fix_rounding_imprecision(self, seating_allocations: List[int]) -> List[int]:
@@ -206,6 +252,7 @@ class SimHandler:
 
         buy_days: List[int] = self.buy_days
         attendees: List[Attendee] = []
+        print(buy_days)
 
         for index, seat_tier in enumerate(seating_distribution):
 

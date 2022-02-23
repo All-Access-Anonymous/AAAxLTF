@@ -12,7 +12,8 @@ class MarketConfig(BaseModel):
 
 class SimConfig(BaseModel):
     days: int = 50
-    attendee_count: int = 50000
+    buy_day_weights: List[float] = [0.2, 0.3, 0.2, 0.2, 0.1]
+    attendee_count: int = 500
     attendee_config: AttendeeConfig = AttendeeConfig()
     market_config: MarketConfig = MarketConfig()
 

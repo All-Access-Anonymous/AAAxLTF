@@ -85,3 +85,9 @@ list of weight distributions such that they always
 total to 1 despite a varying length of the population.
 
 We have a prototype function now. Thank you Dr. P!
+
+
+|------=| Feb 22, 2022 |=------|
+
+Finalizing prototype function and moving it from the Jupyter
+Notebook into the actual simulator.
