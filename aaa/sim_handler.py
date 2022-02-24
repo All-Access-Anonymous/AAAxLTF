@@ -32,7 +32,11 @@ class SimHandler:
     def __init__(self, configs: dict = {}):
         self.configs: dict = configs | self.load_config(configs)
         self.day_weights = self.buy_date_weights()
-        self.buy_days: List[int] =  self.generate_buy_days(self.day_weights)[1]
+
+        self.res_a, self.res_b, self.res_c = self.generate_buy_days(self.day_weights)
+        self.buy_frequency_line_plot = self.res_a
+        self.buy_days: List[int] = self.res_b
+        self.buy_frequency_bar_plot = self.res_c
 
     def load_config(self, config: dict) -> dict:
         """
@@ -79,7 +83,6 @@ class SimHandler:
         trimmed.sort()
         return [item for index, item in trimmed]
 
-
     def buy_date_weights(self) -> List[List]:
         '''
         :param days_range: The duration of the simulation in days.
@@ -91,13 +94,15 @@ class SimHandler:
 
         weights_length: int = len(self.configs['buy_day_weights'])
 
-        day_segment: float  = self.configs['days'] / weights_length
-        day_partitions: List[int] = [0, *[int(day_segment * (i+1)) for i in range(weights_length)] ]
-        day_partitions.pop() # Pop off an extra element such that len(day_partitions) == len(weights)
+        day_segment: float = self.configs['days'] / weights_length
+        day_partitions: List[int] = [
+            0, *[int(day_segment * (i+1)) for i in range(weights_length)]]
+        # Pop off an extra element such that len(day_partitions) == len(weights)
+        day_partitions.pop()
 
         return day_partitions
 
-    def generate_buy_days(self, day_partitions: List[int]) -> List[int]:
+    def generate_buy_days(self, day_partitions: List[int]):
         '''
         Given a population, and day_range, we return a list of ints
         that determine a buy date for each Attendee in the population
@@ -116,10 +121,9 @@ class SimHandler:
         :rtype: List[int]
         '''
         # Creating a Piecewise Linear Fit for the Points
-        # Let's use numpy and the pwlf package (pwlf stands for piecewise linear fit). 
-        # In general, we would want the x and y below to be control points that we 
-        # can adjust in fitting the distribution. 
-
+        # Let's use numpy and the pwlf package (pwlf stands for piecewise linear fit).
+        # In general, we would want the x and y below to be control points that we
+        # can adjust in fitting the distribution.
 
         # Small check, x and y should be same length
         assert len(day_partitions) == len(self.configs['buy_day_weights'])
@@ -137,16 +141,16 @@ class SimHandler:
         my_x_vals = range(days)
 
         # Creating plot
-        fig_a = px.line(y = my_y_vals, x = my_x_vals)
+        fig_a = px.line(y=my_y_vals, x=my_x_vals)
 
-        # Normalizing 
+        # Normalizing
         my_weights = 1/sum(my_y_vals) * np.array(my_y_vals)
 
         sample = random.choices(range(days),
-                                weights = my_weights,
-                                k = self.configs['attendee_count']) ## Sampling
+                                weights=my_weights,
+                                k=self.configs['attendee_count'])  # Sampling
 
-        result = px.histogram(sample, nbins = days)
+        result = px.histogram(sample, nbins=days)
 
         # First return is the line plot
         # Second return is the list of buy dates we'll actually use
@@ -172,7 +176,8 @@ class SimHandler:
         alloc_sum = sum(seating_allocations)
 
         if alloc_sum > self.configs["attendee_count"]:
-            seating_allocations[0] -= alloc_sum - self.configs["attendee_count"]
+            seating_allocations[0] -= alloc_sum - \
+                self.configs["attendee_count"]
             return seating_allocations
         elif alloc_sum < self.configs["attendee_count"]:
             seating_allocations[0] += self.configs["attendee_count"] - alloc_sum
@@ -267,7 +272,6 @@ class SimHandler:
     def diagnostics(self) -> None:
         pass
 
-
     def run(self) -> None | dict:
         """
         Sets the stage for the simulation by instantiating all
@@ -280,7 +284,9 @@ class SimHandler:
             self.configs["attendee_count"]
         )
 
-        market = Market(self.configs["seating_levels"], self.configs['market_config']['log_day'])
+        market = Market(self.configs["seating_levels"],
+                        self.configs["market_config"]['price_increase_multiplier'],
+                        self.configs['market_config']['log_day'])
         med = Mediator(market, *attendees)
 
         for _ in range(self.configs["days"]):

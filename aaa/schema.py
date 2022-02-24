@@ -7,6 +7,7 @@ class AttendeeConfig(BaseModel):
 
 
 class MarketConfig(BaseModel):
+    price_increase_multiplier: float = 1.05
     log_day: bool = True
 
 

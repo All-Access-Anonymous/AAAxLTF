@@ -91,3 +91,16 @@ We have a prototype function now. Thank you Dr. P!
 
 Finalizing prototype function and moving it from the Jupyter
 Notebook into the actual simulator.
+
+
+|------=| Feb 24, 2022 |=------|
+
+Creating price increase effect for lower half tiers.
+First get rid of constant that determines price increase each day.
+rg 1.05
+
+Done.
+
+Track where data is coming from in the simulator.
+- Market().daily_log()
+- The first and third return of SimHandler().generate_buy_days()

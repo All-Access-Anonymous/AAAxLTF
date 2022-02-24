@@ -4,6 +4,7 @@ from typing import List
 class Market(Temporal):
 
     def __init__(self, seating_levels: int,
+                       base_ticket_price: float,
                        log_day: bool) -> None:
         super().__init__()
 
@@ -61,6 +62,7 @@ class Market(Temporal):
         if self.log_day:
             self.daily_log()
 
+    # BTW make this a static method.
     def daily_log(self) -> None:
         '''
         What is there to log?
