@@ -33,6 +33,12 @@ https://0xkowloon.substack.com/p/dissecting-the-olympus-protocol
 
 https://forum.olympusdao.finance/d/77-oip-18-reward-rate-framework-and-reduction
 
+# Deployment
+To be able to install aaa-tokenomics as Python pakcage, you need to have ssh-key setup with Github and proper access rights to this repo.  
+
+```
+pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@danny#egg=aaa-tokenomics
+```
 
 # Development
 
@@ -53,9 +59,10 @@ $ python -m aaa.[the_main_module]
 ```
 
 ## Progress:
+- [x] Setup this project as Python package to be pip installable
 - [ ] Implement visual presentation of the simulation
 - [ ] Add dynamic simulation state configuration (seats tiers, ticket price increase and purchase probability)
-- [ ] Bring back Github Actions with better code linter
+- [x] Bring back Github Actions with better code linter
 - [x] Build the skeleton of the simulation (concert attendee and market)
 
 ## Warning:
