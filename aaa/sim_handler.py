@@ -292,4 +292,4 @@ class SimHandler:
         for _ in range(self.configs["days"]):
             Temporal.elapse_day()
 
-        print(market.logs[0])
+        return market.logs
