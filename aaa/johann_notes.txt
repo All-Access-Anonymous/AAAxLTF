@@ -83,3 +83,24 @@ distribution.
 The current issue is dynamically producing the 
 list of weight distributions such that they always
 total to 1 despite a varying length of the population.
+
+We have a prototype function now. Thank you Dr. P!
+
+
+|------=| Feb 22, 2022 |=------|
+
+Finalizing prototype function and moving it from the Jupyter
+Notebook into the actual simulator.
+
+
+|------=| Feb 24, 2022 |=------|
+
+Creating price increase effect for lower half tiers.
+First get rid of constant that determines price increase each day.
+rg 1.05
+
+Done.
+
+Track where data is coming from in the simulator.
+- Market().daily_log()
+- The first and third return of SimHandler().generate_buy_days()

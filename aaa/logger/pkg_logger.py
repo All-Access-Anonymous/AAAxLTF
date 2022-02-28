@@ -42,7 +42,7 @@ class Logger:
             # catch, and exit execution
             dictConfig(LOGGING_CONFIG)
         except ValueError as error:
-            print(LOGGING_CONFIG)
+            # print(LOGGING_CONFIG)
             sys.stderr.write(
                 f"{Fore.RED}Loading default logging config failed, syntax error\n\n{error}"
             )
