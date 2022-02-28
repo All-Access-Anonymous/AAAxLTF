@@ -29,8 +29,9 @@ class SimHandler:
         every object
     """
 
-    def __init__(self, configs: dict = {}):
-        self.configs: dict = configs | self.load_config(configs)
+    def __init__(self, configs: dict):
+        #self.configs: dict = configs | self.load_config(configs)
+        self.configs: dict = configs
         self.day_weights = self.buy_date_weights()
 
         self.res_a, self.res_b, self.res_c = self.generate_buy_days(self.day_weights)
@@ -257,7 +258,6 @@ class SimHandler:
 
         buy_days: List[int] = self.buy_days
         attendees: List[Attendee] = []
-        print(buy_days)
 
         for index, seat_tier in enumerate(seating_distribution):
 
@@ -292,4 +292,9 @@ class SimHandler:
         for _ in range(self.configs["days"]):
             Temporal.elapse_day()
 
-        return market.logs
+        res_dict: dict =  {
+            "USDC Received by Market": market.USDC_received,
+            "Last Day Base Ticket Price": market.base_ticket_price
+        }
+
+        return res_dict
