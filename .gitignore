@@ -10,7 +10,8 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+# !! Need package files in dist to make this project pip installable from our github repo
+# dist/
 downloads/
 eggs/
 .eggs/
