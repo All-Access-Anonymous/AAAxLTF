@@ -20,8 +20,8 @@ sim_conf = {
         }
     },
 
-    # ## staked_AHM
-    # "staked_AHM_config":{
+    # ## staking_AHM
+    # "staking_AHM_config":{
     #     "sAHM":0,
     # }
 

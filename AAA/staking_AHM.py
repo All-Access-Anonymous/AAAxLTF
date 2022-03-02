@@ -1,7 +1,7 @@
 from typing import List, Dict
 from AAA.temporal import Temporal
 
-class Staked_AHM(Temporal):
+class Staking_AHM(Temporal):
     """
 
     Is a staking contract where users can stake AHM to earn rebase rewards.
@@ -23,9 +23,9 @@ class Staked_AHM(Temporal):
         self.balances: dict = {} #to record all balances of sAHM
         self._epochs_elapsed: int = 0 #For Sim
         #id management
-        self.id: int = Staked_AHM.instance_number        
-        Staked_AHM.instance_number += 1
-        Staked_AHM.all.append(self)
+        self.id: int = Staking_AHM.instance_number        
+        Staking_AHM.instance_number += 1
+        Staking_AHM.all.append(self)
 
     def stake_AHM(self, user: object, amount: int) -> None:
         """ 
@@ -71,7 +71,7 @@ class Staked_AHM(Temporal):
         return sum
 
     def __repr__(self):
-        return f'staked_AHM-{self.id}: total sAHM ={self.get_total_sAHM()}'
+        return f'staking_AHM-{self.id}: total sAHM ={self.get_total_sAHM()}'
 
     def add_interest_to_balances(self, interest_rate: float, users:list) -> None:
         """

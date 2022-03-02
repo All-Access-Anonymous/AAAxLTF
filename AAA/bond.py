@@ -1,4 +1,5 @@
 from typing import List, Dict
+import pprint
 # https://github.com/OlympusDAO/olympus-contracts/blob/Version-1.1/contracts/BondDepository.sol
 
 class Bond():
@@ -83,9 +84,9 @@ class Bond():
         #     - lastBlock: block when last adjustment made
         self.adjustment = {
             'add': False,
-            'rate': 0,
-            'target': 0,
-            'buffer': 0,
+            'rate': 0.1,
+            'target': 1,
+            'buffer': 5,
             'lastBlock': 0
         }
         # BondInfo: stores bond information for depositors (dict)
@@ -93,31 +94,22 @@ class Bond():
         #     - vesting: Blocks left to vest
         #     - lastBlock: Last interaction
         #     - pricePaid: In DAI, for front end viewing
-        self.BondInfo = {
-            'payout': 0,
-            'vesting': 0,
-            'lastBlock': 0,
-            'pricePaid': 0
-        }
+        self.BondInfo = {}
+
+        self.treasury = {'DAI':0, 'AHM':0}
+        self.DAO = {'DAI':0, 'AHM':0}
+        self.epochNumber = 0
 
         self.id: int = Bond.instance_number
         Bond.instance_number += 1
         Bond.all.append(self)
 
-
-    def adjust_BCV(self) -> None:
-        
-        increment <= self.bond_control_variable*0.025
-        self.adjustment['rate'] = increment
-        if self.adjustment['add']:
-            self.bond_control_variable += self.adjustment['rate']
-            if self.bond_control_variable >= self.adjustment['target']:
-                self.adjustment['rate']=0
-        else:
-            self.bond_control_variable -= self.adjustment['rate']
-            if self.bond_control_variable <= self.adjustment['target']:
-                self.adjustment['rate']=0
-        return None
+    ## View Functions
+    def maxPayout(self) -> int:
+        """
+        Calculate max bond size
+        """
+        return self.total_supply() * self.max_payout / 100000
 
     def get_minimal_bond_price(self) -> int:
         """
@@ -140,12 +132,20 @@ class Bond():
         p = 1 + (self.bond_control_variable * self.debt_ratio())
         if p < self.min_price:
             p = self.min_price
-        elif p!=0:
-            self.min_price = 0
-        minimal_bond_price = self.get_minimal_bond_price()
-        if p < minimal_bond_price:
-            p = minimal_bond_price
+        print(f'bond_price: {p}')
         return p
+
+    def _bond_price(self) -> int:
+        """
+        Calculate bond price to DAI Value
+        """
+        p = 1 + (self.bond_control_variable * self.debt_ratio())
+        if p < self.min_price:
+            p = self.min_price
+        elif self.min_price != 0:
+            self.min_price = 0
+        return p
+
 
     def bond_Price_in_USD(self) -> int:
         """
@@ -154,14 +154,24 @@ class Bond():
         if self.is_Liquidity_Bond:
             return 99 ##
         else:
-            return 99 ##
+            return self.bond_price() * 1 #DAI 
 
     def debt_ratio(self) -> int:
         """
-        Calculate current ratio of debt to FHM supply
+        Calculate current ratio of debt to AHM supply
         Returns debt ratio
         """
         return self.current_debt() / self.total_supply()
+
+    def total_supply(self) -> int:
+        """
+        Calculate total supply of AHM
+        """
+
+        
+
+        return 999999 #TODO
+
 
     def standardized_Debt_Ratio(self) -> int:
         """
@@ -178,42 +188,60 @@ class Bond():
         calculate debt factoring in decay
         Returns int
         """
-        # return total_debt - self.debt_decay()
-        pass
+        return self.totalDebt - self.debt_decay()
 
-    
+    ## Internal Helper functions
     def debt_decay(self) -> int:
         """
         amount to decay total debt by
         Returns amount to decay
         """
+        epochSinceLast = self.epochNumber - self.lastDecay
+        decay = self.totalDebt * (epochSinceLast / self.vesting_term)
+        if decay > self.totalDebt:
+            decay = self.totalDebt
+        return decay
 
-        pass
-
-    def calc_percent_vested_for(self, userId: int) -> int:
-        """
-        calculate how far into vesting a depositor is
-        Returns percent vested
-        """
-        pass
-
-
-
-    def calc_pending_payout(self, userId: int) -> int:
-        """
-        Calculate amount of AHM available for claim by depositor
-        Returns pending payout AHM
-        """
-        pass
-    
     def decay_Debt(self) -> None:
         """
-        decay debt by 1% per block
         """
-        pass
+        self.totalDebt = self.totalDebt - self.debt_decay()
+        self.lastDecay = self.epochNumber
+        return None
+
+    def adjust(self) -> None:
+        if self.epochNumber >= self.adjustment['lastBlock'] + self.adjustment['buffer']:
+            initial = self.bond_control_variable
+            if self.adjustment['add']:
+                self.bond_control_variable += self.adjustment['rate']
+                if self.bond_control_variable > self.adjustment['target']:
+                    self.adjustment['rate'] = 0
+            else:
+                self.bond_control_variable -= self.adjustment['rate']
+                if self.bond_control_variable <= self.adjustment['target']:
+                    self.adjustment['rate'] = 0
+            self.adjustment['lastBlock'] = self.epochNumber
+        return None
+
+    # def adjust_BCV(self) -> None:
+    #     if self.epochNumber >= self.adjustment['lastBlock'] + self.adjustment['buffer']:
+    #         increment <= self.bond_control_variable*0.025
+    #         self.adjustment['rate'] = increment
+    #         if self.adjustment['add']:
+    #             self.bond_control_variable += self.adjustment['rate']
+    #             if self.bond_control_variable >= self.adjustment['target']:
+    #                 self.adjustment['rate']=0
+    #         else:
+    #             self.bond_control_variable -= self.adjustment['rate']
+    #             if self.bond_control_variable <= self.adjustment['target']:
+    #                 self.adjustment['rate']=0
+    #         return None
+
+    
+
     ## USer Functions
 
-    def deposit(self, userId: int, amount: int) -> None:
+    def deposit(self, user: object, amount: int) -> None:
         """
         Deposit amount of principle into bond
         """
@@ -226,12 +254,58 @@ class Bond():
         price_in_USD = self.bond_Price_in_USD()
         native_price = self.bond_price()
 
+        value = amount * 1 # DAI rate
+        pay_out = value/price_in_USD
+        ## Payout Min max warning
+        if pay_out < 0.01:
+            RuntimeWarning("Payout Too Low, must be above 0.01 AHM")
+        elif pay_out > self.max_payout:
+            RuntimeWarning("Payout Too High, must be below {} AHM".format(self.max_payout))
+        else:
+            pass
         
 
+        ##profit calculation
+        fee = pay_out * self.fee * 0.01
+        profit = pay_out - fee
+                
+        ## Treasury deposit function
+        user.sub_bal(self.principle, amount)     
+        self.treasury['DAI'] += amount
+        self.DAO['AHM'] += fee
 
+        ##update bond Info
+        if user.id in self.BondInfo.keys():
+            self.BondInfo[user.id]['payout'] += pay_out
+            self.BondInfo[user.id]['vesting'] = self.vesting_term
+            self.BondInfo[user.id]['lastBlock'] = self.epochNumber
+            self.BondInfo[user.id]['pricePaid'] += value
+        else:
+            self.BondInfo[user.id] = {
+                'payout': pay_out,
+                'vesting': self.vesting_term,
+                'lastBlock': self.epochNumber,
+                'pricePaid': value #in USD
+            }
 
+        self.adjust() ##Control Variable Adjustment
+
+        return pay_out
+
+    def redeem_and_autoStake(self) -> None:
+        """
+        Redeem all user's AHM and auto stake
+        """
+
+        # update user wallets
+        # update BondInfo
         pass
 
-
     def __repr__(self):
+        print('Tresury')
+        pprint.pp(self.treasury)
+        print('DAO')
+        pprint.pp(self.DAO)
+        print('BondInfo')
+        pprint.pp(self.BondInfo)
         return f'Bond-{self.principle}'
