@@ -145,7 +145,7 @@ class Market(Temporal):
         # Set y-axes titles
         fig.update_yaxes(title_text="<b>Tickets</b> sold", secondary_y=False)
         fig.update_yaxes(title_text="<b>UDSC</b> collected", secondary_y=True)
-        return fig
+        return fig.to_json()
 
     def export_plots(self):
 
