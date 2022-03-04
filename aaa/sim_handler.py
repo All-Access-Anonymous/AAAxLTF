@@ -294,15 +294,11 @@ class SimHandler:
         for _ in range(self.configs["days"]):
             Temporal.elapse_day()
 
-        '''
-        This is still important, it just needs to be accompanied by the JSON
-        form of the market plots. That then serves as the final plot.
-
         res_dict: dict =  {
             "USDC Received by Market": market.USDC_received,
-            "Last Day Base Ticket Price": market.base_ticket_price
+            "Last Day Base Ticket Price": market.base_ticket_price,
+            "Plots": market.export_plots()
         }
-        '''
 
-        #return market.logs
-        return market.export_plots()
+        return res_dict
+        #return market.export_plots()
