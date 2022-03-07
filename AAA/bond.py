@@ -99,6 +99,7 @@ class Bond():
         self.treasury = {'DAI':0, 'AHM':0}
         self.DAO = {'DAI':0, 'AHM':0}
         self.epochNumber = 0
+        self.sum_AHM_users = 0
 
         self.id: int = Bond.instance_number
         Bond.instance_number += 1
@@ -146,7 +147,6 @@ class Bond():
             self.min_price = 0
         return p
 
-
     def bond_Price_in_USD(self) -> int:
         """
         Calculate bond price to DAI Value
@@ -167,10 +167,11 @@ class Bond():
         """
         Calculate total supply of AHM
         """
-
-        
-
-        return 999999 #TODO
+        sum_AHM = self.treasury['AHM'] + self.DAO['AHM'] + self.sum_AHM_users
+        if sum_AHM == 0:
+            return 1
+        print(f'Total AHM supply: {sum_AHM}')
+        return sum_AHM
 
 
     def standardized_Debt_Ratio(self) -> int:
@@ -212,14 +213,14 @@ class Bond():
     def adjust(self) -> None:
         if self.epochNumber >= self.adjustment['lastBlock'] + self.adjustment['buffer']:
             initial = self.bond_control_variable
-            if self.adjustment['add']:
-                self.bond_control_variable += self.adjustment['rate']
-                if self.bond_control_variable > self.adjustment['target']:
-                    self.adjustment['rate'] = 0
-            else:
-                self.bond_control_variable -= self.adjustment['rate']
-                if self.bond_control_variable <= self.adjustment['target']:
-                    self.adjustment['rate'] = 0
+            if self.adjustment['add']: #if rate should increase
+                self.bond_control_variable += self.adjustment['rate'] #raise rate
+                if self.bond_control_variable > self.adjustment['target']: #if target met
+                    self.adjustment['rate'] = 0 #turn off adjustment
+            else: #if rate should decrease
+                self.bond_control_variable -= self.adjustment['rate'] #lower rate
+                if self.bond_control_variable <= self.adjustment['target']: #if target met
+                    self.adjustment['rate'] = 0 #turn off adjustment
             self.adjustment['lastBlock'] = self.epochNumber
         return None
 
@@ -276,6 +277,7 @@ class Bond():
 
         ##update bond Info
         if user.id in self.BondInfo.keys():
+            print(f'{user.id} already has a bond')
             self.BondInfo[user.id]['payout'] += pay_out
             self.BondInfo[user.id]['vesting'] = self.vesting_term
             self.BondInfo[user.id]['lastBlock'] = self.epochNumber
@@ -288,18 +290,31 @@ class Bond():
                 'pricePaid': value #in USD
             }
 
+        ##update debt info
+        self.totalDebt = self.totalDebt + pay_out 
+
         self.adjust() ##Control Variable Adjustment
 
         return pay_out
 
-    def redeem_and_autoStake(self) -> None:
+    def redeem(self, users:object) -> None:
         """
         Redeem all user's AHM and auto stake
         """
-
-        # update user wallets
         # update BondInfo
-        pass
+        # update user wallets
+        for user in users:
+            if user.id in self.BondInfo.keys():
+                if self.epochNumber >= self.BondInfo[user.id]['lastBlock'] + self.BondInfo[user.id]['vesting']:
+                    user.add_bal('AHM', self.BondInfo[user.id]['payout'])
+                    print(f'Redeemed bonds for {user.id}')
+                    self.BondInfo[user.id]['payout'] = 0
+                    self.BondInfo[user.id]['pricePaid'] = 0
+                    ##debt freed
+                    self.totalDebt = self.totalDebt - self.BondInfo[user.id]['payout']
+                    ##remove item from BondInfo
+                    self.BondInfo.pop(user.id)
+        return None
 
     def __repr__(self):
         print('Tresury')
@@ -308,4 +323,6 @@ class Bond():
         pprint.pp(self.DAO)
         print('BondInfo')
         pprint.pp(self.BondInfo)
+        print('Total Debt')
+        print(self.totalDebt)
         return f'Bond-{self.principle}'

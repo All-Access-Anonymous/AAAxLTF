@@ -5,6 +5,7 @@ from AAA.bond import Bond
 from AAA.staking_AHM import Staking_AHM
 from AAA.config import sim_conf
 from pprint import pprint
+import pandas as pd
 
 class SimHandler:
     """
@@ -37,32 +38,60 @@ class SimHandler:
     def instantiate_Staking_AHM(self) -> None:
         self.staking_AHM = Staking_AHM()
     
-    def instantiate_Simulation(self) -> None:
+    def instantiate_Simulation(self) -> pd.DataFrame:
         self.instantiate_Users() # instantiate users and store in self.users
         self.instantiate_Bonds(1) # instantiate bonds and store in self.bonds
         self.instantiate_Staking_AHM() # instantiated & stored in self.staking_AHM        
-        self.staking_AHM.stake_AHM(self.users[0], 50)
-        self.staking_AHM.stake_AHM(self.users[1], 100)
-        self.staking_AHM.stake_AHM(self.users[2], 100)
-        self.staking_AHM.stake_AHM(self.users[3], 200)
+        # self.staking_AHM.stake_AHM(self.users[0], 50)
+        # self.staking_AHM.stake_AHM(self.users[1], 100)
+        # self.staking_AHM.stake_AHM(self.users[2], 100)
+        # self.staking_AHM.stake_AHM(self.users[3], 200)
         return None
 
     def run(self):
         self.instantiate_Simulation()
-    
+        ## paramteer to record every epoch
+        totalDebt = []
+        treasury_balance = []
+        DAO_balance = []
+        user_balance = []
+        total_sAHM = []
+        total_AHM = []
+
         for i in range(10):
+            print('Iteration------------------------',i)
             self.staking_AHM.add_interest_to_balances(interest_rate=1, users=self.users)
+
             ## all users bond at epoch 1
             if i==1:
                 for user in self.users:
                     self.bonds[0].deposit(user, 100)
-            self.bonds[0].epochNumber += 1
-            
-            print('Iteration------------------------',i)
-            pprint(self.users)
-            print(self.bonds)
+                print(self.bonds)
+    
+        ## epoch routine
+            self.bonds[0].sum_AHM_users = sum(
+                [i.balances['AHM'] + i.balances['sAHM'] for i in self.users])
+        
+        ## All user Redeem
+            self.bonds[0].redeem(self.users)
 
+        ## - all users stake AHM
+            for user in self.users:
+                self.staking_AHM.stake_AHM(user, user.balances['AHM'])
+            
+            pprint(self.users)
+        ## update epoch
+            self.bonds[0].epochNumber += 1
+            self.staking_AHM.epochNumber += 1
+
+            ##record every epoch
+            totalDebt.append(self.bonds[0].totalDebt)
+            treasury_balance.append(self.bonds[0].treasury)
+            DAO_balance.append(self.bonds[0].DAO)
+
+        df = pd.DataFrame([totalDebt, treasury_balance, DAO_balance]).T
         # Elaspse epochs 
         # for _ in range(5):#self.configs["days"]
         #     Temporal.elapse_epoch()
-        return None
+        print(self.bonds)
+        return df

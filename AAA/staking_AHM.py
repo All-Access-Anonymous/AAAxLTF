@@ -19,6 +19,10 @@ class Staking_AHM(Temporal):
     all: List = []
 
     def __init__(self):
+        self.total_bonus = 0
+        self.warmup_period = 0
+        self.epochNumber = 0
+        self.rebase_period = 1
         super().__init__()
         self.balances: dict = {} #to record all balances of sAHM
         self._epochs_elapsed: int = 0 #For Sim
@@ -37,7 +41,7 @@ class Staking_AHM(Temporal):
             #update sAHM in contract and in user Wallet
             self.balances[user.id]['sAHM'] += amount
             user.add_bal('sAHM', amount)
-            print(f'user {user.id} successfully staked {amount} AHM ')
+            # print(f'user {user.id} successfully staked {amount} AHM ')
         else:
             #debit
             user.sub_bal('AHM', amount)            
@@ -46,7 +50,7 @@ class Staking_AHM(Temporal):
                 'sAHM': amount,
             }
             user.add_bal('sAHM', amount)
-            print(f'user {user.id} successfully staked {amount} AHM ')
+            # print(f'user {user.id} successfully staked {amount} AHM ')
         return None
 
     def unstake_AHM(self, user: object, amount: int) -> None:
@@ -58,6 +62,17 @@ class Staking_AHM(Temporal):
         #update AHM in contract and in user Wallet
         self.balances[user.id]['sAHM'] -= amount
         user.add_bal('AHM', amount)
+        return None
+
+    def forfeit_sAHM(self, user: object, amount: int) -> None:
+        """
+        Forfeit sAHM from staking contract
+        Used when user unstakes sAHM, when still in warmup period
+        """
+        # #debit
+        # user.sub_bal('sAHM', amount)
+        # #update AHM in contract and in user Wallet
+        # self.balances[user.id]['sAHM'] -= amount
         return None
 
     def get_total_sAHM(self) -> int:
@@ -73,7 +88,21 @@ class Staking_AHM(Temporal):
     def __repr__(self):
         return f'staking_AHM-{self.id}: total sAHM ={self.get_total_sAHM()}'
 
-    def add_interest_to_balances(self, interest_rate: float, users:list) -> None:
+    def rebase(self, users: object) -> None:
+        """
+        Rebase sAHM into AHM
+        """
+        if self.epochNumber % self.rebase_period == 0:
+            ##[skipped] Check if there is excess reserves backing AHM, then only mint new AHM
+            ## =total reserves - (total AHM supply - total debt)
+            self.add_interest_to_balances(0.01, users)
+            print(f'{self.epochNumber} rebase')
+            ##adjust from bond.py after every rebase
+        else:
+            pass
+        return None
+
+    def add_interest_to_balances(self, interest_rate: float, users: object) -> None:
         """
         Add interest to all sAHM in the contract
         """
