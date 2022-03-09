@@ -17,7 +17,7 @@ class Attendee(Temporal):
 
         self.ticket: List = []
         self.id: int = Attendee.inst_count
-        self.buy_day: int = buy_day
+        self.buy_day: int = buy_day or 1
         self._days_elapsed: int = 0
 
         Attendee.inst_count += 1
