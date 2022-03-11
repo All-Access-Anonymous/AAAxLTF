@@ -125,12 +125,12 @@ class Market(Temporal):
 
         # Add traces
         fig.add_trace(
-            go.Scatter(x=[i+1 for i in range(Config.sim_confs['days']) ], y=tier[1], name="Tickets"),
+            go.Scatter(x=[i+1 for i in range(self.days_elapsed) ], y=tier[1], name="Tickets"),
             secondary_y=False,
         )
 
         fig.add_trace(
-            go.Scatter(x=[i+1 for i in range(Config.sim_confs['days']) ], y=tier[2], name="USDC"),
+            go.Scatter(x=[i+1 for i in range(self.days_elapsed) ], y=tier[2], name="USDC"),
             secondary_y=True,
         )
 

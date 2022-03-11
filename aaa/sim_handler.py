@@ -298,21 +298,19 @@ class SimHandler:
             "Plots": market.export_plots()
         }
 
+        # =====Debug=====
         '''
         print(self.configs['attendee_count'])
+        print(self.configs['days'])
 
         total_market_sales: int = sum(
             market.ticket_registry[key]['Quantities Sold'] for key in market.ticket_registry)
-        print(total_market_sales)
+        print(f'Total ticket sales: {total_market_sales}')
+        '''
+        # ===============
+
 
         Log.info(attendees)
-
-        for person in attendees:
-            if not person.ticket:
-                print(f'{person} has no ticket')
-
-        '''
-
 
         return res_dict
         # return market.export_plots()

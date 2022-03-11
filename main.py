@@ -9,9 +9,9 @@ def test_received_config() -> dict:
 
 def run_sim(configs: dict = {}) -> Any:
 
-    start = timer()
+    #    start = timer()
     conf_to_submit: dict = configs | test_received_config()
-    sim = SimHandler()
+    sim = SimHandler(conf_to_submit)
 
     sim.run()
 

@@ -16,7 +16,7 @@ def test_received_config() -> dict:
 
 def run_sim(configs: dict = {}) -> Any:
 
-    conf_to_submit: dict = configs | test_received_config()
+    conf_to_submit: dict = configs 
     validated_conf = SimConfig(**conf_to_submit)
 
     sim = SimHandler(conf_to_submit)
@@ -27,7 +27,30 @@ def run_sim(configs: dict = {}) -> Any:
 if __name__ == "__main__":
 
     start = timer()
-    sim_res: dict = run_sim()
+    # Test config
+    config={
+      "days": 31,
+      "buy_day_weights": [
+        0.2,
+        0.3,
+        0.2,
+        0.2,
+        0.1
+      ],
+      "attendee_count": 200,
+      "attendee_config": {
+        "lateness": [
+          0.5,
+          0.9
+        ]
+      },
+      "market_config": {
+        "price_increase_multiplier": 1.05,
+        "log_day": True
+      },
+      "seating_levels": 5
+    }
+    sim_res: dict = run_sim(config)
     end = timer()
     Log.info(f'Simulation time: {end - start}')
     print(sim_res)
