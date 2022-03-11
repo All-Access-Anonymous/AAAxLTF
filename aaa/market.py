@@ -1,4 +1,9 @@
 from aaa.temporal import Temporal
+from aaa import Config
+from plotly.subplots import make_subplots
+
+import plotly.graph_objects as go
+
 from typing import List
 
 class Market(Temporal):
@@ -112,6 +117,44 @@ class Market(Temporal):
                  = 253.125
         '''
         return self.base_ticket_price * self.tier_multiplier ** self.tiers - tier
+
+
+    def construct_tier_plot(self, tier, index_number):
+        # Create figure with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        # Add traces
+        fig.add_trace(
+            go.Scatter(x=[i+1 for i in range(Config.sim_confs['days']) ], y=tier[1], name="Tickets"),
+            secondary_y=False,
+        )
+
+        fig.add_trace(
+            go.Scatter(x=[i+1 for i in range(Config.sim_confs['days']) ], y=tier[2], name="USDC"),
+            secondary_y=True,
+        )
+
+        # Add figure title
+        fig.update_layout(
+            title_text=f"Sales of Tier-{index_number + 1}"
+        )
+
+        # Set x-axis title
+        fig.update_xaxes(title_text="Days")
+
+        # Set y-axes titles
+        fig.update_yaxes(title_text="<b>Tickets</b> sold", secondary_y=False)
+        fig.update_yaxes(title_text="<b>UDSC</b> collected", secondary_y=True)
+        return fig.to_json()
+
+    def export_plots(self):
+
+        tier_plots = []
+
+        for index, tier in enumerate(self.logs):
+            tier_plots.append(self.construct_tier_plot(tier, index))
+
+        return tier_plots
 
     def purchase_ticket(self, payment: dict) -> None:
         '''

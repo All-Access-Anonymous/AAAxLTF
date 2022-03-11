@@ -27,7 +27,7 @@ class Mediator(BaseMediator):
 
     def __init__(self, *args) -> None:
         Log.info("Mediator instantiated.")
-        Log.info(f"Mediator has received: {args}")
+        # Log.info(f"Mediator has received: {args}")
         '''
         Objects of various kinds will be passed onto the mediator
         to be registered and to allow for intercommunication.

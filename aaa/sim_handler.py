@@ -34,7 +34,8 @@ class SimHandler:
         self.configs: dict = configs
         self.day_weights = self.buy_date_weights()
 
-        self.res_a, self.res_b, self.res_c = self.generate_buy_days(self.day_weights)
+        self.res_a, self.res_b, self.res_c = self.generate_buy_days(
+            self.day_weights)
         self.buy_frequency_line_plot = self.res_a
         self.buy_days: List[int] = self.res_b
         self.buy_frequency_bar_plot = self.res_c
@@ -259,6 +260,7 @@ class SimHandler:
         buy_days: List[int] = self.buy_days
         attendees: List[Attendee] = []
 
+        print(len(buy_days))
         for index, seat_tier in enumerate(seating_distribution):
 
             seating_tier_number: int = seating_tiers - index
@@ -269,8 +271,6 @@ class SimHandler:
 
         return attendees
 
-    def diagnostics(self) -> None:
-        pass
 
     def run(self) -> None | dict:
         """
@@ -292,9 +292,27 @@ class SimHandler:
         for _ in range(self.configs["days"]):
             Temporal.elapse_day()
 
-        res_dict: dict =  {
+        res_dict: dict = {
             "USDC Received by Market": market.USDC_received,
-            "Last Day Base Ticket Price": market.base_ticket_price
+            "Last Day Base Ticket Price": market.base_ticket_price,
+            "Plots": market.export_plots()
         }
 
+        '''
+        print(self.configs['attendee_count'])
+
+        total_market_sales: int = sum(
+            market.ticket_registry[key]['Quantities Sold'] for key in market.ticket_registry)
+        print(total_market_sales)
+
+        Log.info(attendees)
+
+        for person in attendees:
+            if not person.ticket:
+                print(f'{person} has no ticket')
+
+        '''
+
+
         return res_dict
+        # return market.export_plots()
