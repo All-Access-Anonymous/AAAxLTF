@@ -52,15 +52,14 @@ $ python3 -m pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomi
 
 ## Progress:
 - [x] Setup this project as Python package to be pip installable
-- [ ] Implement visual presentation of the simulation
-- [ ] Add dynamic simulation state configuration (seats tiers, ticket price increase and purchase probability)
+- [x] Implement visual presentation of the simulation
+- [x] Add dynamic simulation state configuration (seats tiers, ticket price increase and purchase probability)
 - [x] Bring back Github Actions with better code linter
 - [x] Build the skeleton of the simulation (concert attendee and market)
 =======
 ## Development
 Update package requirements at pyproject.toml if you have installed or updated a
-python package.  
->>>>>>> 68377b0e5d015824c57543458aa754645efc90df
+python package. 
 
 
 ## Warning
