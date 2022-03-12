@@ -50,7 +50,6 @@ $ python3 -m pip uninstall aaa
 $ python3 -m pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@main#egg=aaa
 ```
 
-<<<<<<< HEAD
 ## Progress:
 - [x] Setup this project as Python package to be pip installable
 - [ ] Implement visual presentation of the simulation
