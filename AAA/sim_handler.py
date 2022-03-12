@@ -6,6 +6,8 @@ from AAA.staking_AHM import Staking_AHM
 from AAA.config import sim_conf
 from pprint import pprint
 import pandas as pd
+import plotly.express as px
+import copy
 
 class SimHandler:
     """
@@ -39,7 +41,7 @@ class SimHandler:
         self.staking_AHM = Staking_AHM()
     
     def instantiate_Simulation(self) -> pd.DataFrame:
-        self.instantiate_Users() # instantiate users and store in self.users
+        self.instantiate_Users(5) # instantiate users and store in self.users
         self.instantiate_Bonds(1) # instantiate bonds and store in self.bonds
         self.instantiate_Staking_AHM() # instantiated & stored in self.staking_AHM        
         # self.staking_AHM.stake_AHM(self.users[0], 50)
@@ -58,40 +60,95 @@ class SimHandler:
         total_sAHM = []
         total_AHM = []
 
-        for i in range(10):
-            print('Iteration------------------------',i)
+        for i in range(60):
+            print('Epoch------------------------',i,'------------------------------')
             self.staking_AHM.add_interest_to_balances(interest_rate=1, users=self.users)
 
             ## all users bond at epoch 1
-            if i==1:
+            if i%7 == 0:
                 for user in self.users:
                     self.bonds[0].deposit(user, 100)
+                print('all users bond')
                 print(self.bonds)
     
-        ## epoch routine
+            ## epoch routine
+            # update total AHM balance from users
             self.bonds[0].sum_AHM_users = sum(
                 [i.balances['AHM'] + i.balances['sAHM'] for i in self.users])
         
-        ## All user Redeem
+            ## All user Redeem
+            # all users redeem claimable bonds
             self.bonds[0].redeem(self.users)
 
-        ## - all users stake AHM
+            ## - all users stake AHM
+            # all users stake redeemed bonds
             for user in self.users:
                 self.staking_AHM.stake_AHM(user, user.balances['AHM'])
             
             pprint(self.users)
-        ## update epoch
+            ## update epoch
             self.bonds[0].epochNumber += 1
             self.staking_AHM.epochNumber += 1
 
             ##record every epoch
-            totalDebt.append(self.bonds[0].totalDebt)
-            treasury_balance.append(self.bonds[0].treasury)
-            DAO_balance.append(self.bonds[0].DAO)
+            totalDebt.append(copy.deepcopy(self.bonds[0].totalDebt))
+            treasury_balance.append(copy.deepcopy(self.bonds[0].treasury))
+            DAO_balance.append(copy.deepcopy(self.bonds[0].DAO))
+            user_balance.append(copy.deepcopy(self.users[0].balances))
 
-        df = pd.DataFrame([totalDebt, treasury_balance, DAO_balance]).T
+        df = pd.DataFrame(
+            [totalDebt, treasury_balance,
+             DAO_balance, user_balance]
+             ).T
+        df.columns = ['totalDebt', 'treasury', 'DAO', 'User1Bal']
         # Elaspse epochs 
         # for _ in range(5):#self.configs["days"]
         #     Temporal.elapse_epoch()
         print(self.bonds)
+
+        ## Charts
+        self.etl_plot_stacked_bar(df, 'treasury', 'treasury')
+        self.etl_plot_stacked_bar(df, 'DAO', 'DAO')
+        self.etl_plot_stacked_bar(df, 'User1Bal', 'User1Bal')
+
+        df_totalDebt = pd.DataFrame(
+            totalDebt,
+            columns=['DAI']
+            )
+        self.plot_stacked_bar(df_totalDebt, 'totalDebt')
+
         return df
+
+    @staticmethod
+    def plot_stacked_bar(df:pd.DataFrame, title:str):
+        colors = px.colors.qualitative.T10
+        # plotly
+        fig = px.bar(df, 
+                    x = df.index,
+                    y = [c for c in df.columns],
+                    # template = 'plotly_dark',
+                    color_discrete_sequence = colors,
+                    title = title, 
+                    )
+        fig.show()
+        return None
+    
+    @staticmethod
+    def get_etl_df(df:pd.DataFrame, col:str) -> pd.DataFrame:
+        ## ETL data
+        if col in df.columns:
+            colnames = list(df[col][0].keys())
+            df_out = pd.DataFrame(
+                [[i[j] for j in colnames] for i in df[col]],
+                columns=colnames
+            )
+        else:
+            RuntimeWarning('col not in df')
+
+        return df_out
+
+    @staticmethod
+    def etl_plot_stacked_bar(df:pd.DataFrame, col:str, title:str):
+        df_out = SimHandler.get_etl_df(df, col)
+        SimHandler.plot_stacked_bar(df_out, title)
+        return None

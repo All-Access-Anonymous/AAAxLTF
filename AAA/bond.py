@@ -53,7 +53,7 @@ class Bond():
 
     def __init__(self, received_conf: Dict = {}):
         self.bond_control_variable: int = 0 # Bonds must be initialized from 0
-        self.vesting_term: int = 5 #epoch (day) ; at least 36 hrs
+        self.vesting_term: int = 3 #epoch (day) ; at least 36 hrs
         self.min_price: int = 0.8
         self.max_payout: int = 500 # 0.5% , can't be above 1%
         self.fee: int = 2 # % goes to AAA Treasury
@@ -173,7 +173,6 @@ class Bond():
         print(f'Total AHM supply: {sum_AHM}')
         return sum_AHM
 
-
     def standardized_Debt_Ratio(self) -> int:
         """
         Calculate the debt ratio in same terms for reserve or liquidity bonds
@@ -203,12 +202,12 @@ class Bond():
             decay = self.totalDebt
         return decay
 
-    def decay_Debt(self) -> None:
-        """
-        """
-        self.totalDebt = self.totalDebt - self.debt_decay()
-        self.lastDecay = self.epochNumber
-        return None
+    # def decay_Debt(self) -> None:
+    #     """
+    #     """
+    #     self.totalDebt = self.totalDebt - self.debt_decay()
+    #     self.lastDecay = self.epochNumber
+    #     return None
 
     def adjust(self) -> None:
         if self.epochNumber >= self.adjustment['lastBlock'] + self.adjustment['buffer']:
@@ -246,7 +245,10 @@ class Bond():
         """
         Deposit amount of principle into bond
         """
-        self.decay_Debt()
+        if user.balances[self.principle] < amount:
+            return "Insufficient funds"
+        ##
+        # self.decay_Debt()
         if self.totalDebt <= self.max_debt:
             pass
         else:
@@ -265,13 +267,12 @@ class Bond():
         else:
             pass
         
-
         ##profit calculation
         fee = pay_out * self.fee * 0.01
         profit = pay_out - fee
                 
         ## Treasury deposit function
-        user.sub_bal(self.principle, amount)     
+        user.sub_bal(self.principle, amount)   
         self.treasury['DAI'] += amount
         self.DAO['AHM'] += fee
 
@@ -292,6 +293,7 @@ class Bond():
 
         ##update debt info
         self.totalDebt = self.totalDebt + pay_out 
+        # print(f'Inc Debt == Total Debt: {self.totalDebt}')
 
         self.adjust() ##Control Variable Adjustment
 
@@ -307,13 +309,14 @@ class Bond():
             if user.id in self.BondInfo.keys():
                 if self.epochNumber >= self.BondInfo[user.id]['lastBlock'] + self.BondInfo[user.id]['vesting']:
                     user.add_bal('AHM', self.BondInfo[user.id]['payout'])
-                    print(f'Redeemed bonds for {user.id}')
-                    self.BondInfo[user.id]['payout'] = 0
-                    self.BondInfo[user.id]['pricePaid'] = 0
                     ##debt freed
                     self.totalDebt = self.totalDebt - self.BondInfo[user.id]['payout']
+                    self.BondInfo[user.id]['payout'] = 0
+                    self.BondInfo[user.id]['pricePaid'] = 0
                     ##remove item from BondInfo
                     self.BondInfo.pop(user.id)
+                    ##logging
+                    print(f'Redeemed bonds for {user.id}')
         return None
 
     def __repr__(self):
