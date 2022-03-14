@@ -20,10 +20,13 @@ sim_conf = {
         }
     },
 
-    # ## staking_AHM
+    ## staking_AHM
+    
     # "staking_AHM_config":{
     #     "sAHM":0,
     # }
+
+    ## BOND config
 
     
 }

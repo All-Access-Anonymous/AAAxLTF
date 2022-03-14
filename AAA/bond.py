@@ -51,7 +51,7 @@ class Bond():
     instance_number: int = 1
     all: List = []
 
-    def __init__(self, received_conf: Dict = {}):
+    def __init__(self, config: Dict = {}):
         self.bond_control_variable: int = 0 # Bonds must be initialized from 0
         self.vesting_term: int = 3 #epoch (day) ; at least 36 hrs
         self.min_price: int = 0.8

@@ -2,6 +2,7 @@
 from typing import List, Dict
 from AAA.user import User
 from AAA.bond import Bond
+from AAA.revenue import Revenue
 from AAA.staking_AHM import Staking_AHM
 from AAA.config import sim_conf
 from pprint import pprint
@@ -24,14 +25,14 @@ class SimHandler:
         self.staking_AHM = None # a staking_AHM object or Contract
 
     def instantiate_Users(self, number: int = 4) -> None:
-        print('instantiate_Users')
+        print(f'instantiating {number} Users')
         for i in range(number):
             user = User(sim_conf)
             self.users.append(user)
         return None
 
     def instantiate_Bonds(self, number: int = 1) -> None:
-        print('instantiate_Bonds')
+        print(f'instantiate {number} Bonds')
         for i in range(number):
             bond = Bond()
             self.bonds.append(bond)
@@ -59,6 +60,13 @@ class SimHandler:
         user_balance = []
         total_sAHM = []
         total_AHM = []
+        #dfa
+        adjustments = []
+        current_debt = []
+        total_supply = []   # AHM supply
+        bond_price = [] #USD
+        bcv = [] 
+
 
         for i in range(60):
             print('Epoch------------------------',i,'------------------------------')
@@ -90,17 +98,34 @@ class SimHandler:
             self.bonds[0].epochNumber += 1
             self.staking_AHM.epochNumber += 1
 
-            ##record every epoch
+            ## record every epoch
+            # df
             totalDebt.append(copy.deepcopy(self.bonds[0].totalDebt))
             treasury_balance.append(copy.deepcopy(self.bonds[0].treasury))
             DAO_balance.append(copy.deepcopy(self.bonds[0].DAO))
             user_balance.append(copy.deepcopy(self.users[0].balances))
-
+            
+            # dfa #df adjustments
+            adjustments.append(copy.deepcopy(self.bonds[0].adjustment))
+            current_debt.append(copy.deepcopy(self.bonds[0].current_debt()))
+            total_supply.append(copy.deepcopy(self.bonds[0].total_supply()))
+            bond_price.append(copy.deepcopy(self.bonds[0].bond_Price_in_USD()))
+            bcv.append(copy.deepcopy(self.bonds[0].bond_control_variable))
+            
+        # Outside loop
+        #df
         df = pd.DataFrame(
             [totalDebt, treasury_balance,
              DAO_balance, user_balance]
              ).T
         df.columns = ['totalDebt', 'treasury', 'DAO', 'User1Bal']
+        ##dfa
+        dfa = pd.DataFrame(
+            [adjustments, current_debt, total_supply, bond_price, bcv]
+            ).T
+        dfa.columns = ['adjustments', 'current_debt', 'total_supply', 'bond_price',
+                       'bcv']
+        
         # Elaspse epochs 
         # for _ in range(5):#self.configs["days"]
         #     Temporal.elapse_epoch()
@@ -117,7 +142,7 @@ class SimHandler:
             )
         self.plot_stacked_bar(df_totalDebt, 'totalDebt')
 
-        return df
+        return [df, dfa]
 
     @staticmethod
     def plot_stacked_bar(df:pd.DataFrame, title:str):
