@@ -52,23 +52,23 @@ class Bond():
     all: List = []
 
     def __init__(self, config: Dict = {}):
-        self.bond_control_variable: int = 0 # Bonds must be initialized from 0
-        self.vesting_term: int = 3 #epoch (day) ; at least 36 hrs
-        self.min_price: int = 0.8
-        self.max_payout: int = 500 # 0.5% , can't be above 1%
-        self.fee: int = 2 # % goes to AAA Treasury
-        self.max_debt: int = 0.9
+        self.bond_control_variable: int = config['bond_term']['bond_control_variable'] # Bonds must be initialized from 0
+        self.vesting_term: int = config['bond_term']['vesting_term'] #epoch (day) ; at least 36 hrs
+        self.min_price: int = config['bond_term']['min_price'] # in DAI
+        self.max_payout: int = config['bond_term']['max_payout']  # 0.5% , can't be above 1%
+        self.fee: int = config['bond_term']['fee'] # % goes to AAA Treasury
+        self.max_debt: int = config['bond_term']['max_debt'] #(max debt ratio allowed), max % total supply created as debt
 
         # - AHM: token given as payout
         # - principle: token used to create bond
-        self.principle = 'DAI'
+        self.principle = config['principle']
         # - treasury: mints AHM when receives principle
         # - DAO: receives profit share from bond
         # --------------------------------------------------
         # - staking: to auto stake payment
         # - stakingHelper: to stake and claim if no staking warmup
         # - is_Liquidity_Bond: bool 
-        self.is_Liquidity_Bond = False # true if LP bond
+        self.is_Liquidity_Bond = config['is_Liquidity_Bond'] # true if LP bond
 
         # - totalDebt: total value of outstanding bonds; used for pricing
         self.totalDebt = 0
@@ -82,13 +82,16 @@ class Bond():
         #     - target: BCV when adjustment finished
         #     - buffer: minimum length (in blocks) between adjustments
         #     - lastBlock: block when last adjustment made
-        self.adjustment = {
-            'add': False,
-            'rate': 0.1,
-            'target': 1,
-            'buffer': 5,
-            'lastBlock': 0
-        }
+
+        self.adjustment = config['adjustment']
+
+        # self.adjustment = {
+        #     'add': True,
+        #     'rate': 0.02,
+        #     'target': 0.2,
+        #     'buffer': 2,
+        #     'lastBlock': 0
+        # }
         # BondInfo: stores bond information for depositors (dict)
         #     - payout: OHM remaining to be paid
         #     - vesting: Blocks left to vest
@@ -125,6 +128,15 @@ class Bond():
         else:
             return price
 
+    # def bond_price(self) -> int:
+    #     """
+    #     Calculate bond price to DAI Value
+    #     """
+    #     p = 1 + (self.bond_control_variable * self.debt_ratio())
+    #     if p < self.min_price:
+    #         p = self.min_price
+    #     print(f'bond_price updated to: {p}')
+    #     return p
 
     def bond_price(self) -> int:
         """
@@ -133,18 +145,9 @@ class Bond():
         p = 1 + (self.bond_control_variable * self.debt_ratio())
         if p < self.min_price:
             p = self.min_price
-        print(f'bond_price: {p}')
-        return p
-
-    def _bond_price(self) -> int:
-        """
-        Calculate bond price to DAI Value
-        """
-        p = 1 + (self.bond_control_variable * self.debt_ratio())
-        if p < self.min_price:
-            p = self.min_price
         elif self.min_price != 0:
             self.min_price = 0
+        print(f'bond_price updated to: {p}')
         return p
 
     def bond_Price_in_USD(self) -> int:
@@ -246,7 +249,8 @@ class Bond():
         Deposit amount of principle into bond
         """
         if user.balances[self.principle] < amount:
-            return "Insufficient funds"
+            print(f'User {user.id} does not have enough {self.principle} to deposit {amount}')
+            return None
         ##
         # self.decay_Debt()
         if self.totalDebt <= self.max_debt:
@@ -254,11 +258,11 @@ class Bond():
         else:
             RuntimeWarning("Bond is over debt limit, Max Capacity Reached")
         
-        price_in_USD = self.bond_Price_in_USD()
+        # price_in_USD = self.bond_Price_in_USD()
         native_price = self.bond_price()
 
         value = amount * 1 # DAI rate
-        pay_out = value/price_in_USD
+        pay_out = value/native_price
         ## Payout Min max warning
         if pay_out < 0.01:
             RuntimeWarning("Payout Too Low, must be above 0.01 AHM")

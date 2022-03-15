@@ -3,6 +3,7 @@ from typing import List, Dict
 from AAA.user import User
 from AAA.bond import Bond
 from AAA.revenue import Revenue
+from AAA.treasury import Treasury
 from AAA.staking_AHM import Staking_AHM
 from AAA.config import sim_conf
 from pprint import pprint
@@ -18,11 +19,14 @@ class SimHandler:
 
     """
 
-    def __init__(self, configs: dict = {}):
+    def __init__(self, _config: dict):
         # self.config = self.load_config(configs)
+        self.config = _config
         self.users = [] # all user objects
         self.bonds = [] # all bond objects
         self.staking_AHM = None # a staking_AHM object or Contract
+        self.treasury_obj = None
+        self.revenue_obj = None
 
     def instantiate_Users(self, number: int = 4) -> None:
         print(f'instantiating {number} Users')
@@ -34,17 +38,28 @@ class SimHandler:
     def instantiate_Bonds(self, number: int = 1) -> None:
         print(f'instantiate {number} Bonds')
         for i in range(number):
-            bond = Bond()
+            bond = Bond(self.config['bond_config'])
             self.bonds.append(bond)
         return None
 
     def instantiate_Staking_AHM(self) -> None:
         self.staking_AHM = Staking_AHM()
-    
+        return None
+
+    def instantiate_Treasury(self) -> None:
+        self.treasury_obj = Treasury()
+        return None
+
+    def instantiate_Revenue(self) -> None:
+        self.revenue_obj = Revenue()
+        return None
+
     def instantiate_Simulation(self) -> pd.DataFrame:
-        self.instantiate_Users(5) # instantiate users and store in self.users
+        self.instantiate_Users(10) # instantiate users and store in self.users
         self.instantiate_Bonds(1) # instantiate bonds and store in self.bonds
         self.instantiate_Staking_AHM() # instantiated & stored in self.staking_AHM        
+        self.instantiate_Treasury() # instantiated & stored in self.treasury_obj
+        self.instantiate_Revenue() # instantiated & stored in self.revenue_obj
         # self.staking_AHM.stake_AHM(self.users[0], 50)
         # self.staking_AHM.stake_AHM(self.users[1], 100)
         # self.staking_AHM.stake_AHM(self.users[2], 100)
@@ -66,27 +81,40 @@ class SimHandler:
         total_supply = []   # AHM supply
         bond_price = [] #USD
         bcv = [] 
+        debt_ratio = []
 
-
-        for i in range(60):
+        for i in range(self.config['days']):
             print('Epoch------------------------',i,'------------------------------')
             self.staking_AHM.add_interest_to_balances(interest_rate=1, users=self.users)
 
-            ## all users bond at epoch 1
-            if i%7 == 0:
+            ## all users bond after every 7th epoch 
+            if self.bonds[0].bond_price() >=1: # if bond offered at market price or discount BUY
                 for user in self.users:
                     self.bonds[0].deposit(user, 100)
-                print('all users bond')
+                print('all users bond 100 DAI')
                 print(self.bonds)
+
+            ## add revenue to treasury
+            self.revenue_obj.add_lp_reward(self.treasury_obj, 6)
+            self.revenue_obj.add_interest_from_fiat_loan(self.treasury_obj, 20)
+            self.bonds[0].treasury = self.treasury_obj.balances
+
+            # after bonding, update treasury balance
+            for k,v in self.bonds[0].treasury.items():
+                if k in self.treasury_obj.balances.items():
+                    self.treasury_obj.balances[k] += v
+                else:
+                    self.treasury_obj.balances[k] = v
     
-            ## epoch routine
+            #### Daily epoch routine
             # update total AHM balance from users
             self.bonds[0].sum_AHM_users = sum(
                 [i.balances['AHM'] + i.balances['sAHM'] for i in self.users])
-        
-            ## All user Redeem
-            # all users redeem claimable bonds
+            # All user Redeemclaimable bonds
             self.bonds[0].redeem(self.users)
+            # Adjust BCV if required
+            
+            
 
             ## - all users stake AHM
             # all users stake redeemed bonds
@@ -101,7 +129,7 @@ class SimHandler:
             ## record every epoch
             # df
             totalDebt.append(copy.deepcopy(self.bonds[0].totalDebt))
-            treasury_balance.append(copy.deepcopy(self.bonds[0].treasury))
+            treasury_balance.append(copy.deepcopy(self.treasury_obj.balances))
             DAO_balance.append(copy.deepcopy(self.bonds[0].DAO))
             user_balance.append(copy.deepcopy(self.users[0].balances))
             
@@ -109,8 +137,9 @@ class SimHandler:
             adjustments.append(copy.deepcopy(self.bonds[0].adjustment))
             current_debt.append(copy.deepcopy(self.bonds[0].current_debt()))
             total_supply.append(copy.deepcopy(self.bonds[0].total_supply()))
-            bond_price.append(copy.deepcopy(self.bonds[0].bond_Price_in_USD()))
+            bond_price.append(copy.deepcopy(self.bonds[0].bond_price()))
             bcv.append(copy.deepcopy(self.bonds[0].bond_control_variable))
+            debt_ratio.append(copy.deepcopy(self.bonds[0].debt_ratio()))
             
         # Outside loop
         #df
@@ -121,10 +150,10 @@ class SimHandler:
         df.columns = ['totalDebt', 'treasury', 'DAO', 'User1Bal']
         ##dfa
         dfa = pd.DataFrame(
-            [adjustments, current_debt, total_supply, bond_price, bcv]
+            [adjustments, current_debt, total_supply, bond_price, bcv, debt_ratio]
             ).T
         dfa.columns = ['adjustments', 'current_debt', 'total_supply', 'bond_price',
-                       'bcv']
+                       'bcv', 'debt_ratio']
         
         # Elaspse epochs 
         # for _ in range(5):#self.configs["days"]
