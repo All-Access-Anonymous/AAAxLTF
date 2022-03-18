@@ -25,13 +25,15 @@ numpy==1.22.2
 packaging==21.3
 pandas==1.4.0
 pep517==0.12.0
-pip==22.0.3
 pkginfo==1.8.2
+plotly==5.6.0
 pluggy==1.0.0
+pwlf==2.0.5
 py==1.11.0
 pycodestyle==2.8.0
 pycparser==2.21
 pydantic==1.9.0
+pyDOE==0.3.8
 pyflakes==2.4.0
 Pygments==2.11.2
 pyparsing==3.0.7
@@ -43,8 +45,8 @@ readme-renderer==32.0
 requests==2.27.1
 requests-toolbelt==0.9.1
 rfc3986==2.0.0
+scipy==1.8.0
 SecretStorage==3.3.1
-setuptools==60.5.0
 six==1.16.0
 snowballstemmer==2.2.0
 Sphinx==4.4.0
@@ -55,6 +57,7 @@ sphinxcontrib-htmlhelp==2.0.0
 sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
+tenacity==8.0.1
 toml==0.10.2
 tomli==2.0.1
 tqdm==4.62.3
@@ -62,5 +65,4 @@ twine==3.8.0
 typing_extensions==4.0.1
 urllib3==1.26.8
 webencodings==0.5.1
-wheel==0.37.1
 zipp==3.7.0
