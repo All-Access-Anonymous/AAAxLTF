@@ -14,8 +14,9 @@ import copy
 class SimHandler:
     """
     Responsiblities:
-        Instantiate Users
-        Instantiate 
+        Instantiate Objects
+        Run simulation
+        Generate dataframes and plots
 
     """
 
@@ -23,6 +24,7 @@ class SimHandler:
         # self.config = self.load_config(configs)
         self.config = _config
         self.users = [] # all user objects
+        self.minter = None # minter object instance of User with starting balance
         self.bonds = [] # all bond objects
         self.staking_AHM = None # a staking_AHM object or Contract
         self.treasury_obj = None
@@ -30,8 +32,18 @@ class SimHandler:
 
     def instantiate_Users(self, number: int = 4) -> None:
         print(f'instantiating {number} Users')
+        
+        minter_bal = {
+            'DAI': 0,
+            'AHM': 600,
+            'sAHM': 0,
+            'ETH': 0,
+        }
+        minter = User(minter_bal)
+        self.minter = minter
+
         for i in range(number):
-            user = User(sim_conf)
+            user = User(sim_conf['user_config']['balances'])
             self.users.append(user)
         return None
 
@@ -66,7 +78,16 @@ class SimHandler:
         # self.staking_AHM.stake_AHM(self.users[3], 200)
         return None
 
+    # def reset_simulation(self) -> None:
+    #     self.users = []
+    #     self.bonds = []
+    #     self.staking_AHM = None
+    #     self.treasury_obj = None
+    #     self.revenue_obj = None
+    #     return None
+
     def run(self):
+        # self.reset_simulation()
         self.instantiate_Simulation()
         ## paramteer to record every epoch
         totalDebt = []
@@ -85,13 +106,18 @@ class SimHandler:
 
         for i in range(self.config['days']):
             print('Epoch------------------------',i,'------------------------------')
-            self.staking_AHM.add_interest_to_balances(interest_rate=1, users=self.users)
+            # self.staking_AHM.add_interest_to_balances(interest_rate=1, users=self.users)
+            #### Daily epoch routine ==before loop
+            # update total AHM balance from users
+            self.bonds[0].sum_AHM_users = sum(
+                [i.balances['AHM'] + i.balances['sAHM'] for i in self.users]) +\
+                    self.minter.balances['AHM']
 
             ## all users bond after every 7th epoch 
             if self.bonds[0].bond_price() >=1: # if bond offered at market price or discount BUY
                 for user in self.users:
-                    self.bonds[0].deposit(user, 100)
-                print('all users bond 100 DAI')
+                    if user.balances['DAI'] > 0:
+                        self.bonds[0].deposit(user, 10)
                 print(self.bonds)
 
             ## add revenue to treasury
@@ -106,10 +132,7 @@ class SimHandler:
                 else:
                     self.treasury_obj.balances[k] = v
     
-            #### Daily epoch routine
-            # update total AHM balance from users
-            self.bonds[0].sum_AHM_users = sum(
-                [i.balances['AHM'] + i.balances['sAHM'] for i in self.users])
+            #### Daily epoch routine ==after loop
             # All user Redeemclaimable bonds
             self.bonds[0].redeem(self.users)
             # Adjust BCV if required
@@ -121,7 +144,7 @@ class SimHandler:
             for user in self.users:
                 self.staking_AHM.stake_AHM(user, user.balances['AHM'])
             
-            pprint(self.users)
+            # pprint(self.users)    
             ## update epoch
             self.bonds[0].epochNumber += 1
             self.staking_AHM.epochNumber += 1
@@ -158,20 +181,20 @@ class SimHandler:
         # Elaspse epochs 
         # for _ in range(5):#self.configs["days"]
         #     Temporal.elapse_epoch()
-        print(self.bonds)
+        # print(self.bonds)
 
         ## Charts
-        self.etl_plot_stacked_bar(df, 'treasury', 'treasury')
-        self.etl_plot_stacked_bar(df, 'DAO', 'DAO')
-        self.etl_plot_stacked_bar(df, 'User1Bal', 'User1Bal')
+        f1 = self.etl_plot_stacked_bar(df, 'treasury', 'treasury')
+        f2 = self.etl_plot_stacked_bar(df, 'DAO', 'DAO')
+        f3 = self.etl_plot_stacked_bar(df, 'User1Bal', 'User1Bal')
 
         df_totalDebt = pd.DataFrame(
             totalDebt,
             columns=['DAI']
             )
-        self.plot_stacked_bar(df_totalDebt, 'totalDebt')
+        f4 = self.plot_stacked_bar(df_totalDebt, 'totalDebt')
 
-        return [df, dfa]
+        return [df, dfa, [f1, f2, f3, f4]]
 
     @staticmethod
     def plot_stacked_bar(df:pd.DataFrame, title:str):
@@ -184,8 +207,8 @@ class SimHandler:
                     color_discrete_sequence = colors,
                     title = title, 
                     )
-        fig.show()
-        return None
+        # fig.show()
+        return fig
     
     @staticmethod
     def get_etl_df(df:pd.DataFrame, col:str) -> pd.DataFrame:
@@ -204,5 +227,5 @@ class SimHandler:
     @staticmethod
     def etl_plot_stacked_bar(df:pd.DataFrame, col:str, title:str):
         df_out = SimHandler.get_etl_df(df, col)
-        SimHandler.plot_stacked_bar(df_out, title)
-        return None
+        fig = SimHandler.plot_stacked_bar(df_out, title)
+        return fig

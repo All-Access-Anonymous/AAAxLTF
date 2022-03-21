@@ -13,8 +13,8 @@ class User():
     instance_number: int = 1
     all: List = []
 
-    def __init__(self, config: Dict = {}):
-        self.balances: dict() = copy.deepcopy(config["user_config"]["balances"])
+    def __init__(self, init_bal: Dict = {}):
+        self.balances: dict() = init_bal
         ## WHY copy.deepcopy?
         # https://stackoverflow.com/questions/47499998/modifying-dictionary-in-one-instance-of-a-class-makes-same-change-to-all-other-i
         

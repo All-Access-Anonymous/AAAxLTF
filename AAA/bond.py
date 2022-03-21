@@ -84,7 +84,7 @@ class Bond():
         #     - lastBlock: block when last adjustment made
 
         self.adjustment = config['adjustment']
-
+        ## Input format
         # self.adjustment = {
         #     'add': True,
         #     'rate': 0.02,
@@ -92,6 +92,7 @@ class Bond():
         #     'buffer': 2,
         #     'lastBlock': 0
         # }
+
         # BondInfo: stores bond information for depositors (dict)
         #     - payout: OHM remaining to be paid
         #     - vesting: Blocks left to vest
@@ -226,22 +227,6 @@ class Bond():
             self.adjustment['lastBlock'] = self.epochNumber
         return None
 
-    # def adjust_BCV(self) -> None:
-    #     if self.epochNumber >= self.adjustment['lastBlock'] + self.adjustment['buffer']:
-    #         increment <= self.bond_control_variable*0.025
-    #         self.adjustment['rate'] = increment
-    #         if self.adjustment['add']:
-    #             self.bond_control_variable += self.adjustment['rate']
-    #             if self.bond_control_variable >= self.adjustment['target']:
-    #                 self.adjustment['rate']=0
-    #         else:
-    #             self.bond_control_variable -= self.adjustment['rate']
-    #             if self.bond_control_variable <= self.adjustment['target']:
-    #                 self.adjustment['rate']=0
-    #         return None
-
-    
-
     ## USer Functions
 
     def deposit(self, user: object, amount: int) -> None:
@@ -249,7 +234,7 @@ class Bond():
         Deposit amount of principle into bond
         """
         if user.balances[self.principle] < amount:
-            print(f'User {user.id} does not have enough {self.principle} to deposit {amount}')
+            print(f'Deposit Failed: User {user.id} does not have enough {self.principle} to deposit {amount}')
             return None
         ##
         # self.decay_Debt()
@@ -296,7 +281,7 @@ class Bond():
             }
 
         ##update debt info
-        self.totalDebt = self.totalDebt + pay_out 
+        self.totalDebt = self.totalDebt + pay_out # + pay_out * (1+bond_discount_factor)
         # print(f'Inc Debt == Total Debt: {self.totalDebt}')
 
         self.adjust() ##Control Variable Adjustment
