@@ -25,7 +25,7 @@ class Bond():
         - AHM: token given as payout
         - principle: token used to create bond
         - treasury: mints AHM when receives principle
-        - DAO: receives profit share from bond
+        - DAO: receives profit share from bond, goes to treasury as a backing to AHM
         --------------------------------------------------
         - staking: to auto stake payment
         - stakingHelper: to stake and claim if no staking warmup
@@ -111,7 +111,6 @@ class Bond():
         self.BondInfo = {}
 
         self.treasury = {'DAI':0, 'AHM':0}
-        self.DAO = {'DAI':0, 'AHM':0}
         self.epochNumber = 0
         self.sum_AHM_users = 0
 
@@ -182,7 +181,7 @@ class Bond():
         """
         Calculate total supply of AHM
         """
-        sum_AHM = self.treasury['AHM'] + self.DAO['AHM'] + self.sum_AHM_users
+        sum_AHM = self.treasury['AHM'] + self.sum_AHM_users
         if sum_AHM == 0:
             return 1
         
@@ -275,7 +274,7 @@ class Bond():
         ## Treasury deposit function
         user.sub_bal(self.principle, amount)   
         self.treasury['DAI'] += amount
-        self.DAO['AHM'] += fee
+        self.treasury['AHM'] += fee
 
         ##update bond Info
         if user.id in self.BondInfo.keys():
@@ -323,8 +322,6 @@ class Bond():
     # def __repr__(self):
     #     print('Tresury')
     #     pprint.pp(self.treasury)
-    #     print('DAO')
-    #     pprint.pp(self.DAO)
     #     print('BondInfo')
     #     pprint.pp(self.BondInfo)
     #     print('Total Debt')

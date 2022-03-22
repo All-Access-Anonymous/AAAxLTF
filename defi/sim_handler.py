@@ -15,6 +15,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+# # now if you use logger it will not log to console.
 logger.propagate = False
 
 # formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
@@ -34,12 +35,12 @@ logger.addHandler(file_handler)
 
 ## import class objects 
 from typing import List, Dict
-from AAA.user import User
-from AAA.bond import Bond
-from AAA.revenue import Revenue
-from AAA.treasury import Treasury
-from AAA.staking_AHM import Staking_AHM
-from AAA.config import sim_conf
+from defi.user import User
+from defi.bond import Bond
+from defi.revenue import Revenue
+from defi.treasury import Treasury
+from defi.staking_AHM import Staking_AHM
+from defi.config import sim_conf
 # from pprint import pprint
 import pandas as pd
 import plotly.express as px
@@ -130,7 +131,6 @@ class SimHandler:
         ## paramteer to record every epoch
         totalDebt = []
         treasury_balance = []
-        DAO_balance = []
         user_balance = []
         total_sAHM = []
         total_AHM = []
@@ -190,7 +190,6 @@ class SimHandler:
             # df
             totalDebt.append(copy.deepcopy(self.bonds[0].totalDebt))
             treasury_balance.append(copy.deepcopy(self.treasury_obj.balances))
-            DAO_balance.append(copy.deepcopy(self.bonds[0].DAO))
             user_balance.append(copy.deepcopy(self.users[0].balances))
             
             # dfa #df adjustments
@@ -206,9 +205,9 @@ class SimHandler:
         #df
         df = pd.DataFrame(
             [totalDebt, treasury_balance,
-             DAO_balance, user_balance]
+             user_balance]
              ).T
-        df.columns = ['totalDebt', 'treasury', 'DAO', 'User1Bal']
+        df.columns = ['totalDebt', 'treasury', 'User1Bal']
         ##dfa
         dfa = pd.DataFrame(
             [adjustments, current_debt, total_supply, bond_price, bcv, debt_ratio]
@@ -217,17 +216,16 @@ class SimHandler:
                        'bcv', 'debt_ratio']
         
         ## Charts
-        f1 = self.etl_plot_stacked_bar(df, 'treasury', 'treasury')
-        f2 = self.etl_plot_stacked_bar(df, 'DAO', 'DAO')
-        f3 = self.etl_plot_stacked_bar(df, 'User1Bal', 'User1Bal')
+        f0 = self.etl_plot_stacked_bar(df, 'treasury', 'treasury')
+        f1 = self.etl_plot_stacked_bar(df, 'User1Bal', 'User1Bal')
 
         df_totalDebt = pd.DataFrame(
             totalDebt,
             columns=['DAI']
             )
-        f4 = self.plot_stacked_bar(df_totalDebt, 'totalDebt')
+        f2 = self.plot_stacked_bar(df_totalDebt, 'totalDebt')
 
-        return [df, dfa, [f1, f2, f3, f4]]
+        return [df, dfa, [f0, f1, f2]]
 
     @staticmethod
     def plot_stacked_bar(df:pd.DataFrame, title:str):
