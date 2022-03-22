@@ -20,7 +20,7 @@ https://forum.olympusdao.finance/d/77-oip-18-reward-rate-framework-and-reduction
 To be able to install aaa-tokenomics as Python pakcage, you need to have ssh-key setup with Github and proper access rights to this repo.  
 
 ```
-pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@danny#egg=aaa-tokenomics
+pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@danny#egg=aaa
 ```
 
 ## Requirements
