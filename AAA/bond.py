@@ -1,3 +1,13 @@
+# Logging
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+file_handler = logging.FileHandler('simulation.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+#------------------------------------------------------------------------------
 from typing import List, Dict
 import pprint
 # https://github.com/OlympusDAO/olympus-contracts/blob/Version-1.1/contracts/BondDepository.sol
@@ -108,6 +118,7 @@ class Bond():
         self.id: int = Bond.instance_number
         Bond.instance_number += 1
         Bond.all.append(self)
+        logger.info(f'Bond {self.id} created')
 
     ## View Functions
     def maxPayout(self) -> int:
@@ -148,7 +159,7 @@ class Bond():
             p = self.min_price
         elif self.min_price != 0:
             self.min_price = 0
-        print(f'bond_price updated to: {p}')
+        logger.info(msg=f'bond_price updated to: {p}')
         return p
 
     def bond_Price_in_USD(self) -> int:
@@ -174,7 +185,8 @@ class Bond():
         sum_AHM = self.treasury['AHM'] + self.DAO['AHM'] + self.sum_AHM_users
         if sum_AHM == 0:
             return 1
-        print(f'Total AHM supply: {sum_AHM}')
+        
+        logger.info(f'Total AHM supply: {sum_AHM}')
         return sum_AHM
 
     def standardized_Debt_Ratio(self) -> int:
@@ -234,14 +246,14 @@ class Bond():
         Deposit amount of principle into bond
         """
         if user.balances[self.principle] < amount:
-            print(f'Deposit Failed: User {user.id} does not have enough {self.principle} to deposit {amount}')
+            logger.info(f'Deposit Failed: User {user.id} does not have enough {self.principle} to deposit {amount}')
             return None
         ##
         # self.decay_Debt()
         if self.totalDebt <= self.max_debt:
             pass
         else:
-            RuntimeWarning("Bond is over debt limit, Max Capacity Reached")
+            logger.warning("Bond is over debt limit, Max Capacity Reached")
         
         # price_in_USD = self.bond_Price_in_USD()
         native_price = self.bond_price()
@@ -250,9 +262,9 @@ class Bond():
         pay_out = value/native_price
         ## Payout Min max warning
         if pay_out < 0.01:
-            RuntimeWarning("Payout Too Low, must be above 0.01 AHM")
+            logger.warning("Payout Too Low, must be above 0.01 AHM")
         elif pay_out > self.max_payout:
-            RuntimeWarning("Payout Too High, must be below {} AHM".format(self.max_payout))
+            logger.warning("Payout Too High, must be below {} AHM".format(self.max_payout))
         else:
             pass
         
@@ -267,7 +279,7 @@ class Bond():
 
         ##update bond Info
         if user.id in self.BondInfo.keys():
-            print(f'{user.id} already has a bond')
+            logger.info(f'{user.id} already has a bond')
             self.BondInfo[user.id]['payout'] += pay_out
             self.BondInfo[user.id]['vesting'] = self.vesting_term
             self.BondInfo[user.id]['lastBlock'] = self.epochNumber
@@ -305,16 +317,16 @@ class Bond():
                     ##remove item from BondInfo
                     self.BondInfo.pop(user.id)
                     ##logging
-                    print(f'Redeemed bonds for {user.id}')
+                    logger.info(f'Redeemed bonds for {user.id}')
         return None
 
-    def __repr__(self):
-        print('Tresury')
-        pprint.pp(self.treasury)
-        print('DAO')
-        pprint.pp(self.DAO)
-        print('BondInfo')
-        pprint.pp(self.BondInfo)
-        print('Total Debt')
-        print(self.totalDebt)
-        return f'Bond-{self.principle}'
+    # def __repr__(self):
+    #     print('Tresury')
+    #     pprint.pp(self.treasury)
+    #     print('DAO')
+    #     pprint.pp(self.DAO)
+    #     print('BondInfo')
+    #     pprint.pp(self.BondInfo)
+    #     print('Total Debt')
+    #     print(self.totalDebt)
+    #     return f'Bond-{self.principle}'

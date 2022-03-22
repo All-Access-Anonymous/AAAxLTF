@@ -1,7 +1,17 @@
-from typing import List, Dict
-from AAA.temporal import Temporal
+# Logging
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+file_handler = logging.FileHandler('simulation.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+#------------------------------------------------------------------------------
 
-class Staking_AHM(Temporal):
+from typing import List, Dict
+
+class Staking_AHM():
     """
 
     Is a staking contract where users can stake AHM to earn rebase rewards.
@@ -41,7 +51,7 @@ class Staking_AHM(Temporal):
             #update sAHM in contract and in user Wallet
             self.balances[user.id]['sAHM'] += amount
             user.add_bal('sAHM', amount)
-            # print(f'user {user.id} successfully staked {amount} AHM ')
+            logger.debug(f'user {user.id} successfully staked {amount} AHM ')
         else:
             #debit
             user.sub_bal('AHM', amount)            
@@ -50,7 +60,7 @@ class Staking_AHM(Temporal):
                 'sAHM': amount,
             }
             user.add_bal('sAHM', amount)
-            # print(f'user {user.id} successfully staked {amount} AHM ')
+            logger.debug(f'user {user.id} successfully staked {amount} AHM ')
         return None
 
     def unstake_AHM(self, user: object, amount: int) -> None:
@@ -96,7 +106,7 @@ class Staking_AHM(Temporal):
             ##[skipped] Check if there is excess reserves backing AHM, then only mint new AHM
             ## =total reserves - (total AHM supply - total debt)
             self.add_interest_to_balances(0.01, users)
-            print(f'{self.epochNumber} rebase')
+            logger.info(f'{self.epochNumber} rebase')
             ##adjust from bond.py after every rebase
         else:
             pass
@@ -112,28 +122,3 @@ class Staking_AHM(Temporal):
             #update balances in user wallets
             users[k-1].add_bal('sAHM', to_add)
         return None
-
-    def run_epoch(self) -> None:
-        """
-        Inherited from Temporal ABC
-        This will be called by Temporal to initiate
-        this instance's daily routines / responsibilities.
-        """
-        self._epochs_elapsed += 1
-        self.epoch_assess()
-    
-    def epoch_assess(self) -> None:
-        """
-        day_assess contains the daily responsibilities
-        assigned to each instance of this class.
-        """
-        self.add_interest_to_balances(interest_rate=1)# 1 percent
-
-    @property
-    def epochs_elapsed(self):
-        """
-        Inherited from Temporal ABC.
-        Returns the days elapsed for this object but
-        without needing to call this as a function.
-        """
-        return self._epochs_elapsed

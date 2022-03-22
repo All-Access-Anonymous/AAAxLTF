@@ -1,3 +1,14 @@
+# Logging
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+file_handler = logging.FileHandler('simulation.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+#------------------------------------------------------------------------------
+
 from typing import List, Dict
 import copy
 
@@ -22,21 +33,7 @@ class User():
         
         User.instance_number += 1
         User.all.append(self)
-
-    # def buy_bond(self, asset: str, amount: int) -> None:
-    #     pass
-
-    # def redeem_AHM(self, amount: int) -> None:
-    #     pass
-
-    # def sell_AHM(self, amount: int) -> None:
-    #     pass
-
-    # def stake_AHM(self, amount: int) -> None:
-    #     """ 
-    #     Stake AHM to earn interest
-    #     """
-    #     pass
+        logger.info(f'User-{self.id} created')
 
     def sub_bal(self, asset: str, amount: int) -> None:
         """
@@ -45,8 +42,8 @@ class User():
         if self.balances[asset] >= amount:
             self.balances[asset] -= amount
         else:
-            raise Exception(f'Not enough {asset}')
-        return None
+            logger.exception(f'Not enough {asset}')
+        return None            
 
     def add_bal(self, asset: str, amount: int) -> None:
         """

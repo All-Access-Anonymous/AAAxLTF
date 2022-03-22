@@ -1,3 +1,14 @@
+# Logging
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+file_handler = logging.FileHandler('simulation.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+#------------------------------------------------------------------------------
+
 # https://github.com/OlympusDAO/olympus-contracts/blob/Version-1.1/contracts/Treasury.sol
 from typing import List, Dict
 
@@ -24,6 +35,8 @@ class Treasury():
 
         Treasury.instance_number += 1
         Treasury.all.append(self)
+
+        logger.info(msg=f'Treasury-{self.id} created')
 
 
 

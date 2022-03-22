@@ -1,3 +1,37 @@
+## LOGGING 
+import logging
+
+# DEBUG: Detailed information, typically of interest only when diagnosing problems.
+
+# INFO: Confirmation that things are working as expected.
+
+# WARNING: An indication that something unexpected happened, or indicative of some problem in the near future (e.g. ‘disk space low’). The software is still working as expected.
+
+# ERROR: Due to a more serious problem, the software has not been able to perform some function.
+
+# CRITICAL: A serious error, indicating that the program itself may be unable to continue running.
+
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+
+# formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+
+file_handler = logging.FileHandler('simulation.log')
+# # Only logs above ERROR gets to file
+# file_handler.setLevel(logging.ERROR)
+file_handler.setFormatter(formatter)
+
+# # Only logs above DEBUG gets to console, its hierarchy is default to logger level
+# stream_handler = logging.StreamHandler()
+# stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+# logger.addHandler(stream_handler)
+
 ## import class objects 
 from typing import List, Dict
 from AAA.user import User
@@ -6,7 +40,7 @@ from AAA.revenue import Revenue
 from AAA.treasury import Treasury
 from AAA.staking_AHM import Staking_AHM
 from AAA.config import sim_conf
-from pprint import pprint
+# from pprint import pprint
 import pandas as pd
 import plotly.express as px
 import copy
@@ -30,8 +64,11 @@ class SimHandler:
         self.treasury_obj = None
         self.revenue_obj = None
 
+        logger.info('Simulation Handler instantiated')
+
     def instantiate_Users(self, number: int = 4) -> None:
-        print(f'instantiating {number} Users')
+        
+        logger.info(f'instantiate {number} Users')        
         
         minter_bal = {
             'DAI': 0,
@@ -48,7 +85,7 @@ class SimHandler:
         return None
 
     def instantiate_Bonds(self, number: int = 1) -> None:
-        print(f'instantiate {number} Bonds')
+        logger.info(f'instantiate {number} Bonds')
         for i in range(number):
             bond = Bond(self.config['bond_config'])
             self.bonds.append(bond)
@@ -87,6 +124,7 @@ class SimHandler:
     #     return None
 
     def run(self):
+        logger.info('$$$------------Starting Simulation------------$$$')
         # self.reset_simulation()
         self.instantiate_Simulation()
         ## paramteer to record every epoch
@@ -105,7 +143,7 @@ class SimHandler:
         debt_ratio = []
 
         for i in range(self.config['days']):
-            print('Epoch------------------------',i,'------------------------------')
+            logger.info(f'Epoch ------------------------------------------------ {i}')
             # self.staking_AHM.add_interest_to_balances(interest_rate=1, users=self.users)
             #### Daily epoch routine ==before loop
             # update total AHM balance from users
@@ -118,7 +156,7 @@ class SimHandler:
                 for user in self.users:
                     if user.balances['DAI'] > 0:
                         self.bonds[0].deposit(user, 10)
-                print(self.bonds)
+                # logger.info(self.bonds)
 
             ## add revenue to treasury
             self.revenue_obj.add_lp_reward(self.treasury_obj, 6)
@@ -144,7 +182,6 @@ class SimHandler:
             for user in self.users:
                 self.staking_AHM.stake_AHM(user, user.balances['AHM'])
             
-            # pprint(self.users)    
             ## update epoch
             self.bonds[0].epochNumber += 1
             self.staking_AHM.epochNumber += 1
@@ -165,6 +202,7 @@ class SimHandler:
             debt_ratio.append(copy.deepcopy(self.bonds[0].debt_ratio()))
             
         # Outside loop
+        logger.info('$$$------------ Simulation Completed ------------$$$')
         #df
         df = pd.DataFrame(
             [totalDebt, treasury_balance,
@@ -178,11 +216,6 @@ class SimHandler:
         dfa.columns = ['adjustments', 'current_debt', 'total_supply', 'bond_price',
                        'bcv', 'debt_ratio']
         
-        # Elaspse epochs 
-        # for _ in range(5):#self.configs["days"]
-        #     Temporal.elapse_epoch()
-        # print(self.bonds)
-
         ## Charts
         f1 = self.etl_plot_stacked_bar(df, 'treasury', 'treasury')
         f2 = self.etl_plot_stacked_bar(df, 'DAO', 'DAO')

@@ -1,3 +1,14 @@
+# Logging
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+file_handler = logging.FileHandler('simulation.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+#------------------------------------------------------------------------------
+
 from typing import List, Dict
 import copy
 
@@ -25,10 +36,14 @@ class Revenue():
 
     def add_lp_reward(self, treasury_obj: object, apy:int) -> None:
         """
-        Add amount to asset
+        Add reward to LP ratio of tresaury
+        inupt:
+            treasury_obj: Treasury object
+            apy: int
         """
         treasury_obj.balances['DAI'] += treasury_obj.balances['DAI'] *\
             treasury_obj.ratio['lp'] * (apy/(100*365))
+        logger.info(f'LP reward updated to Treasury')
         return None
 
     def add_interest_from_fiat_loan(self, treasury_obj: object, apy:int) -> None:
@@ -37,6 +52,7 @@ class Revenue():
         """
         treasury_obj.balances['DAI'] += treasury_obj.balances['DAI'] *\
             treasury_obj.ratio['lend'] * (apy/(100*365))
+        logging.info(f'Interest from fiat loan updated to Treasury')
         return None
 
     ## staking rewards are accrued at frequency of EMI payout from Vendor
