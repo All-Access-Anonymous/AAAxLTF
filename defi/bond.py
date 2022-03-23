@@ -257,8 +257,8 @@ class Bond():
         elif user.balances[self.principle] < amount:
             logger.warning(f'Deposit Failed: User {user.id} does not have sufficient amount of {self.principle}. Requires {amount}')
             return None
-        # elif self.totalDebt <= self.max_debt:
-        #     logger.warning("Bond is over debt limit, Max Capacity Reached")
+        elif self.debt_ratio() > self.max_debt:
+            logger.warning("Bond is over debt limit, Max Capacity Reached")
         else:
             # price_in_USD = self.bond_Price_in_USD()
             native_price = self.bond_price()
@@ -326,6 +326,15 @@ class Bond():
                 if self.BondInfo[user.id]['payout'] <= 0.00000001:
                     self.BondInfo.pop(user.id)
         return None
+
+    def excess_reserve(self):
+        """
+        Return AHM excess reserve
+
+        AHM price is always backed by 1 DAI
+        For this simulation, it is assumed that the market price of AHM is 1 DAI and no arbitrage is possible
+        """
+        return self.treasury['DAI'] + self.treasury['AHM'] * 1 - self.total_supply()
 
     # def __repr__(self):
     #     print('Tresury')

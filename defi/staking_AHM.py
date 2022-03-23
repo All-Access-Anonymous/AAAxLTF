@@ -35,7 +35,7 @@ class Staking_AHM():
         self.rebase_period = 1
         super().__init__()
         self.balances: dict = {} #to record all balances of sAHM
-        self._epochs_elapsed: int = 0 #For Sim
+
         #id management
         self.id: int = Staking_AHM.instance_number        
         Staking_AHM.instance_number += 1

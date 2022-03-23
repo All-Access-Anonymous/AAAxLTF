@@ -141,6 +141,7 @@ class SimHandler:
         bond_price = [] #USD
         bcv = [] 
         debt_ratio = []
+        excess_reserve = []
 
         for i in range(self.config['days']):
             logger.info(f'Epoch ------------------------------------------------ {i}')
@@ -151,12 +152,13 @@ class SimHandler:
                 [i.balances['AHM'] + i.balances['sAHM'] for i in self.users]) +\
                     self.minter.balances['AHM']
 
-            ## all users bond after every 7th epoch 
-            if self.bonds[0].bond_price() <=1: # if bond offered at market price or discount BUY
+            # all users bond after every 7th epoch 
+            if self.bonds[0].debt_ratio() > self.bonds[0].max_debt:
+                logger.warning("Bond is over debt limit, Max Capacity Reached")
+            else:
                 for user in self.users:
                     if user.balances['DAI'] > 0:
-                        self.bonds[0].deposit(user, 100)
-                # logger.info(self.bonds)
+                        self.bonds[0].deposit(user, 10)
 
             ## add revenue to treasury
             self.revenue_obj.add_lp_reward(self.treasury_obj, 6)
@@ -202,6 +204,7 @@ class SimHandler:
             bond_price.append(copy.deepcopy(self.bonds[0].bond_price()))
             bcv.append(copy.deepcopy(self.bonds[0].bond_control_variable))
             debt_ratio.append(copy.deepcopy(self.bonds[0].debt_ratio()))
+            excess_reserve.append(copy.deepcopy(self.bonds[0].excess_reserve()))
             
         # Outside loop
         logger.info('$$$------------ Simulation Completed ------------$$$')
@@ -212,10 +215,10 @@ class SimHandler:
         df.columns = ['totalDebt', 'treasury']
         ##dfa
         dfa = pd.DataFrame(
-            [adjustments, current_debt, total_supply, bond_price, bcv, debt_ratio]
+            [adjustments, current_debt, total_supply, bond_price, bcv, debt_ratio, excess_reserve]
             ).T
         dfa.columns = ['adjustments', 'current_debt', 'total_supply', 'bond_price',
-                       'bcv', 'debt_ratio']
+                       'bcv', 'debt_ratio', 'excess_reserve']
         ## df user
         df_user = pd.DataFrame(user_balance)
 
@@ -233,8 +236,6 @@ class SimHandler:
             ],
             self.plot_stacked_bar(df_totalDebt, 'totalDebt')
         ]
-        
-        
 
         return [df, dfa, charts]
 
@@ -270,4 +271,4 @@ class SimHandler:
     def etl_plot_stacked_bar(df:pd.DataFrame, col:str, title:str):
         df_out = SimHandler.get_etl_df(df, col)
         fig = SimHandler.plot_stacked_bar(df_out, title)
-        return fig
+        return fig.to_json()
