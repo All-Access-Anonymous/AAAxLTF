@@ -47,14 +47,8 @@ $ pip uninstall aaa
 # Install updated package
 $ pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@defi-model#egg=aaa-defi
 ```
+---
 
-## Progress:
-- [x] Setup this project as Python package to be pip installable
-- [x] Implement visual presentation of the simulation
-- [x] Add dynamic simulation state configuration (seats tiers, ticket price increase and purchase probability)
-- [x] Bring back Github Actions with better code linter
-- [x] Build the skeleton of the simulation (concert attendee and market)
-=======
 ## Development
 Update package requirements at pyproject.toml if you have installed or updated a
 python package. 
@@ -71,5 +65,4 @@ Solution is to simply use:
 ```
 pip list --format=freeze > requirements.txt
 ```
-
 instead of pip freeze.
