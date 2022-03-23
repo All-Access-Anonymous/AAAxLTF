@@ -51,10 +51,11 @@ class Bond():
         - lastBlock: block when last adjustment made
 
     BondInfo: stores bond information for depositors (dict)
-        - payout: OHM remaining to be paid
+        - payout: AHM remaining to be paid
         - vesting: Blocks left to vest
         - lastBlock: Last interaction
         - pricePaid: In DAI, for front end viewing
+        - epochAmt: amount to unlock at each epoch
 
     """
     
@@ -203,19 +204,25 @@ class Bond():
         calculate debt factoring in decay
         Returns int
         """
-        return self.totalDebt - self.debt_decay()
+        ## calculate debt from BondInfo
+        # sum of all payouts remaining
+        current_debt = sum(
+                [v['payout'] for k,v in self.BondInfo.items()]
+                )
+        return current_debt 
+        # return self.totalDebt - self.debt_decay()
 
     ## Internal Helper functions
-    def debt_decay(self) -> int:
-        """
-        amount to decay total debt by
-        Returns amount to decay
-        """
-        epochSinceLast = self.epochNumber - self.lastDecay
-        decay = self.totalDebt * (epochSinceLast / self.vesting_term)
-        if decay > self.totalDebt:
-            decay = self.totalDebt
-        return decay
+    # def debt_decay(self) -> int:
+    #     """
+    #     amount to decay total debt by
+    #     Returns amount to decay
+    #     """
+    #     epochSinceLast = self.epochNumber - self.lastDecay
+    #     decay = self.totalDebt * (epochSinceLast / self.vesting_term)
+    #     if decay > self.totalDebt:
+    #         decay = self.totalDebt
+    #     return decay
 
     # def decay_Debt(self) -> None:
     #     """
@@ -244,60 +251,60 @@ class Bond():
         """
         Deposit amount of principle into bond
         """
-        if user.balances[self.principle] < amount:
-            logger.info(f'Deposit Failed: User {user.id} does not have enough {self.principle} to deposit {amount}')
-            return None
-        ##
-        # self.decay_Debt()
-        if self.totalDebt <= self.max_debt:
-            pass
-        else:
-            logger.warning("Bond is over debt limit, Max Capacity Reached")
-        
-        # price_in_USD = self.bond_Price_in_USD()
-        native_price = self.bond_price()
-
-        value = amount * 1 # DAI rate
-        pay_out = value/native_price
-        ## Payout Min max warning
-        if pay_out < 0.01:
-            logger.warning("Payout Too Low, must be above 0.01 AHM")
-        elif pay_out > self.max_payout:
-            logger.warning("Payout Too High, must be below {} AHM".format(self.max_payout))
-        else:
-            pass
-        
-        ##profit calculation
-        fee = pay_out * self.fee * 0.01
-        profit = pay_out - fee
-                
-        ## Treasury deposit function
-        user.sub_bal(self.principle, amount)   
-        self.treasury['DAI'] += amount
-        self.treasury['AHM'] += fee
-
-        ##update bond Info
         if user.id in self.BondInfo.keys():
-            logger.info(f'{user.id} already has a bond')
-            self.BondInfo[user.id]['payout'] += pay_out
-            self.BondInfo[user.id]['vesting'] = self.vesting_term
-            self.BondInfo[user.id]['lastBlock'] = self.epochNumber
-            self.BondInfo[user.id]['pricePaid'] += value
+            logger.warning(msg=f'User {user.id} already has ongoing bond')
+            return None
+        elif user.balances[self.principle] < amount:
+            logger.warning(f'Deposit Failed: User {user.id} does not have sufficient amount of {self.principle}. Requires {amount}')
+            return None
+        # elif self.totalDebt <= self.max_debt:
+        #     logger.warning("Bond is over debt limit, Max Capacity Reached")
         else:
+            # price_in_USD = self.bond_Price_in_USD()
+            native_price = self.bond_price()
+
+            value = amount * 1 # DAI rate
+            pay_out = value/native_price
+            ## Payout Min max warning
+            if pay_out < 0.01:
+                logger.warning("Payout Too Low, must be above 0.01 AHM")
+            elif pay_out > self.max_payout:
+                logger.warning("Payout Too High, must be below {} AHM".format(self.max_payout))
+            else:
+                pass
+            
+            ##profit calculation
+            fee = pay_out * self.fee * 0.01
+            profit = pay_out - fee
+                    
+            ## Treasury deposit function
+            user.sub_bal(self.principle, amount)   
+            self.treasury['DAI'] += amount
+            self.treasury['AHM'] += fee
+
+            # ##update bond Info
+            # if user.id in self.BondInfo.keys():
+            #     logger.info(f'{user.id} already has a bond')
+            #     self.BondInfo[user.id]['payout'] += pay_out
+            #     self.BondInfo[user.id]['vesting'] = self.vesting_term
+            #     self.BondInfo[user.id]['lastBlock'] = self.epochNumber
+            #     self.BondInfo[user.id]['pricePaid'] += value
+            # else:
             self.BondInfo[user.id] = {
                 'payout': pay_out,
                 'vesting': self.vesting_term,
                 'lastBlock': self.epochNumber,
-                'pricePaid': value #in USD
+                'pricePaid': value, #in USD
+                'epochAmt': pay_out/self.vesting_term
             }
 
-        ##update debt info
-        self.totalDebt = self.totalDebt + pay_out # + pay_out * (1+bond_discount_factor)
-        # print(f'Inc Debt == Total Debt: {self.totalDebt}')
+            ##update debt info
+            self.totalDebt = self.totalDebt + pay_out # + pay_out * (1+bond_discount_factor)
+            # print(f'Inc Debt == Total Debt: {self.totalDebt}')
 
-        self.adjust() ##Control Variable Adjustment
+            self.adjust() ##Control Variable Adjustment
 
-        return pay_out
+            return pay_out
 
     def redeem(self, users:object) -> None:
         """
@@ -307,16 +314,17 @@ class Bond():
         # update user wallets
         for user in users:
             if user.id in self.BondInfo.keys():
-                if self.epochNumber >= self.BondInfo[user.id]['lastBlock'] + self.BondInfo[user.id]['vesting']:
-                    user.add_bal('AHM', self.BondInfo[user.id]['payout'])
-                    ##debt freed
-                    self.totalDebt = self.totalDebt - self.BondInfo[user.id]['payout']
-                    self.BondInfo[user.id]['payout'] = 0
-                    self.BondInfo[user.id]['pricePaid'] = 0
-                    ##remove item from BondInfo
+                # if self.epochNumber >= self.BondInfo[user.id]['lastBlock'] + self.BondInfo[user.id]['vesting']:
+                self.BondInfo[user.id]['payout'] = self.BondInfo[user.id]['payout'] - self.BondInfo[user.id]['epochAmt']
+                self.BondInfo[user.id]['lastBlock'] = self.BondInfo[user.id]['lastBlock'] + 1
+                user.add_bal('AHM', self.BondInfo[user.id]['epochAmt'])
+                logger.info(f'User {user.id} redeemed {self.BondInfo[user.id]["epochAmt"]} AHM')
+                logger.info(f'User {user.id} still has {self.BondInfo[user.id]["payout"]} AHM to redeem')
+                ##debt freed
+                self.totalDebt = self.totalDebt - self.BondInfo[user.id]['epochAmt']
+                ##remove item from BondInfo if vesting period is over
+                if self.BondInfo[user.id]['payout'] <= 0.00000001:
                     self.BondInfo.pop(user.id)
-                    ##logging
-                    logger.info(f'Redeemed bonds for {user.id}')
         return None
 
     # def __repr__(self):

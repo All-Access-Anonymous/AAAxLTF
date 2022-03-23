@@ -152,10 +152,10 @@ class SimHandler:
                     self.minter.balances['AHM']
 
             ## all users bond after every 7th epoch 
-            if self.bonds[0].bond_price() >=1: # if bond offered at market price or discount BUY
+            if self.bonds[0].bond_price() <=1: # if bond offered at market price or discount BUY
                 for user in self.users:
                     if user.balances['DAI'] > 0:
-                        self.bonds[0].deposit(user, 10)
+                        self.bonds[0].deposit(user, 100)
                 # logger.info(self.bonds)
 
             ## add revenue to treasury
@@ -186,11 +186,14 @@ class SimHandler:
             self.bonds[0].epochNumber += 1
             self.staking_AHM.epochNumber += 1
 
+            logger.info(self.bonds[0].BondInfo)
             ## record every epoch
             # df
             totalDebt.append(copy.deepcopy(self.bonds[0].totalDebt))
             treasury_balance.append(copy.deepcopy(self.treasury_obj.balances))
-            user_balance.append(copy.deepcopy(self.users[0].balances))
+
+            #df user
+            user_balance.append(copy.deepcopy([i.balances for i in self.users]))
             
             # dfa #df adjustments
             adjustments.append(copy.deepcopy(self.bonds[0].adjustment))
@@ -204,28 +207,36 @@ class SimHandler:
         logger.info('$$$------------ Simulation Completed ------------$$$')
         #df
         df = pd.DataFrame(
-            [totalDebt, treasury_balance,
-             user_balance]
+            [totalDebt, treasury_balance]
              ).T
-        df.columns = ['totalDebt', 'treasury', 'User1Bal']
+        df.columns = ['totalDebt', 'treasury']
         ##dfa
         dfa = pd.DataFrame(
             [adjustments, current_debt, total_supply, bond_price, bcv, debt_ratio]
             ).T
         dfa.columns = ['adjustments', 'current_debt', 'total_supply', 'bond_price',
                        'bcv', 'debt_ratio']
-        
-        ## Charts
-        f0 = self.etl_plot_stacked_bar(df, 'treasury', 'treasury')
-        f1 = self.etl_plot_stacked_bar(df, 'User1Bal', 'User1Bal')
+        ## df user
+        df_user = pd.DataFrame(user_balance)
 
         df_totalDebt = pd.DataFrame(
             totalDebt,
             columns=['DAI']
             )
-        f2 = self.plot_stacked_bar(df_totalDebt, 'totalDebt')
 
-        return [df, dfa, [f0, f1, f2]]
+        ## Charts
+        charts = [
+            self.etl_plot_stacked_bar(df, 'treasury', 'treasury'),
+            [
+                self.etl_plot_stacked_bar(df_user, i, f'Balance User-{i}') for i in range(len(df_user.columns))
+
+            ],
+            self.plot_stacked_bar(df_totalDebt, 'totalDebt')
+        ]
+        
+        
+
+        return [df, dfa, charts]
 
     @staticmethod
     def plot_stacked_bar(df:pd.DataFrame, title:str):

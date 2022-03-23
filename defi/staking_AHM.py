@@ -45,22 +45,23 @@ class Staking_AHM():
         """ 
         Stake AHM to earn interest
         """
-        if user.id in self.balances.keys():
-            #debit
-            user.sub_bal('AHM', amount)            
-            #update sAHM in contract and in user Wallet
-            self.balances[user.id]['sAHM'] += amount
-            user.add_bal('sAHM', amount)
-            logger.debug(f'user {user.id} successfully staked {amount} AHM ')
-        else:
-            #debit
-            user.sub_bal('AHM', amount)            
-            #update sAHM in contract and in user Wallet
-            self.balances[user.id] = {
-                'sAHM': amount,
-            }
-            user.add_bal('sAHM', amount)
-            logger.debug(f'user {user.id} successfully staked {amount} AHM ')
+        if user.balances['AHM'] > 0:
+            if user.id in self.balances.keys():
+                #debit
+                user.sub_bal('AHM', amount)            
+                #update sAHM in contract and in user Wallet
+                self.balances[user.id]['sAHM'] += amount
+                user.add_bal('sAHM', amount)
+                logger.debug(f'user {user.id} successfully staked {amount} AHM ')
+            else:
+                #debit
+                user.sub_bal('AHM', amount)            
+                #update sAHM in contract and in user Wallet
+                self.balances[user.id] = {
+                    'sAHM': amount,
+                }
+                user.add_bal('sAHM', amount)
+                logger.debug(f'user {user.id} successfully staked {amount} AHM ')
         return None
 
     def unstake_AHM(self, user: object, amount: int) -> None:
