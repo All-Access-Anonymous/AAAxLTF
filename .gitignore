@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 AAA/notes.txt
+debug.ipynb
+simulation.log
