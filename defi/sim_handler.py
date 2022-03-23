@@ -233,7 +233,7 @@ class SimHandler:
             'user1': self.etl_plot_stacked_bar(df_user, 0, 'Balance User 0'),
             
             #     self.etl_plot_stacked_bar(df_user, i, f'Balance User-{i}') for i in range(len(df_user.columns))
-            'totalDebt': self.plot_stacked_bar(df_totalDebt, 'totalDebt')
+            'totalDebt': self.plot_stacked_bar(df_totalDebt, 'totalDebt').to_json()
         }
 
         return {'df': df, 'dfa': dfa, 'charts': charts}
