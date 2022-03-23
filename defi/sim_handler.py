@@ -228,16 +228,15 @@ class SimHandler:
             )
 
         ## Charts
-        charts = [
-            self.etl_plot_stacked_bar(df, 'treasury', 'treasury'),
-            [
-                self.etl_plot_stacked_bar(df_user, i, f'Balance User-{i}') for i in range(len(df_user.columns))
+        charts = {
+            'treasury': self.etl_plot_stacked_bar(df, 'treasury', 'treasury'),
+            'user1': self.etl_plot_stacked_bar(df_user, 0, 'Balance User 0'),
+            
+            #     self.etl_plot_stacked_bar(df_user, i, f'Balance User-{i}') for i in range(len(df_user.columns))
+            'totalDebt': self.plot_stacked_bar(df_totalDebt, 'totalDebt')
+        }
 
-            ],
-            self.plot_stacked_bar(df_totalDebt, 'totalDebt')
-        ]
-
-        return [df, dfa, charts]
+        return {'df': df, 'dfa': dfa, 'charts': charts}
 
     @staticmethod
     def plot_stacked_bar(df:pd.DataFrame, title:str):
