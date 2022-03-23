@@ -38,6 +38,18 @@ $ vf activate AAA
 # Note: requires ssh-key setup with your github account with access to this repo
 $ pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@defi-model#egg=aaa-defi
 ```
+## Usage
+```
+from defi.sim_handler import SimHandler
+from defi.config import sim_conf
+
+s = SimHandler(sim_conf)
+df, dfa, f = s.run()
+
+print(df)
+```
+
+
 ### Updating package
 ```
 # Uninstall AAA package
