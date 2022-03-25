@@ -30,12 +30,12 @@ Python >= 3.8
 ## Installation 
 ```
 # Start new virtual fish environment (you can replace 'AAA' into something you prefer)
-$ vf new AAA
+$ vf new Mazzy
 
 # Activate the new environment
-$ vf activate AAA
+$ vf activate Mazzy
 
-# Pip install AAA Defi package 
+# Pip install aaa-defi Defi package 
 # Note: requires ssh-key setup with your github account with access to this repo
 $ pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@defi-model#egg=aaa-defi
 ```
@@ -53,9 +53,9 @@ print(df)
 
 ### Updating package
 ```
-# Uninstall AAA package
-$ vf activate AAA
-$ pip uninstall aaa
+# Uninstall aaa-defi package
+$ vf activate mazzy
+$ pip uninstall aaa-defi
 
 # Install updated package
 $ pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@defi-model#egg=aaa-defi
