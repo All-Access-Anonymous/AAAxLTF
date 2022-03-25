@@ -33,9 +33,8 @@ class Staking_AHM:
         self.warmup_period = 0
         self.epochNumber = 0
         self.rebase_period = 1
-        super().__init__()
-        self.balances: dict = {} #to record all balances of sAHM
-
+        self.total_sAHM = 0
+        # super().__init__()
         #id management
         self.id: int = Staking_AHM.instance_number        
         Staking_AHM.instance_number += 1
@@ -46,22 +45,11 @@ class Staking_AHM:
         Stake AHM to earn interest
         """
         if user.balances['AHM'] > 0:
-            if user.id in self.balances.keys():
-                #debit
-                user.sub_bal('AHM', amount)            
-                #update sAHM in contract and in user Wallet
-                self.balances[user.id]['sAHM'] += amount
-                user.add_bal('sAHM', amount)
-                logger.debug(f'user {user.id} successfully staked {amount} AHM ')
-            else:
-                #debit
-                user.sub_bal('AHM', amount)            
-                #update sAHM in contract and in user Wallet
-                self.balances[user.id] = {
-                    'sAHM': amount,
-                }
-                user.add_bal('sAHM', amount)
-                logger.debug(f'user {user.id} successfully staked {amount} AHM ')
+            #debit
+            user.sub_bal('AHM', amount)            
+            #update sAHM in contract and in user Wallet
+            user.add_bal('sAHM', amount)
+            logger.debug(f'user {user.id} successfully staked {amount} AHM ')
         return None
 
     def unstake_AHM(self, user: object, amount: int) -> None:
@@ -71,7 +59,6 @@ class Staking_AHM:
         #debit
         user.sub_bal('sAHM', amount)
         #update AHM in contract and in user Wallet
-        self.balances[user.id]['sAHM'] -= amount
         user.add_bal('AHM', amount)
         return None
 
@@ -86,18 +73,8 @@ class Staking_AHM:
         # self.balances[user.id]['sAHM'] -= amount
         return None
 
-    def get_total_sAHM(self) -> int:
-        """
-        Get total sAHM minted or in circulation
-        """
-        sum=0
-        bals = self.balances
-        for i in bals:
-            sum += bals[i]['sAHM']
-        return sum
-
     def __repr__(self):
-        return f'staking_AHM-{self.id}: total sAHM ={self.get_total_sAHM()}'
+        return f'staking_AHM-{self.id}: total sAHM ={self.total_sAHM}'
 
     def rebase(self, users: object, excess_reserve: float, total_sAHM: float) -> None:
         """
@@ -116,16 +93,16 @@ class Staking_AHM:
 
     def add_rebase_rewards(self, reward_amount: float, users: object, total_sAHM: float) -> None:
         """
-        Add interest to all sAHM in the contract
+        Add rebase rewards to all users who have staked their AHM
         """
         if total_sAHM != 0:
             reward_amount_per_sOHM = reward_amount / total_sAHM
         else:
             reward_amount_per_sOHM = 0
-        for k in self.balances.keys():
-            to_add = self.balances[k]['sAHM'] * reward_amount_per_sOHM
-            self.balances[k]['sAHM'] += to_add 
-            #update balances in user wallets
-            users[k-1].add_bal('sAHM', to_add)
+
+        to_add = self.total_sAHM * reward_amount_per_sOHM
+        for user in users:
+            user.balances['sAHM'] += to_add
+            logger.info(f'user {user.id} received {to_add} sAHM')
         logger.info(f'{reward_amount} sAHM distributed as rebase')
         return None

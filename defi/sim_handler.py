@@ -136,10 +136,20 @@ class SimHandler:
 
         for i in range(self.config['days']):
             logger.info(f'Epoch ------------------------------------------------ {i}')
+            
+            ## Update total sAHM in staking_AHM object
+            self.staking_AHM.total_sAHM = sum(
+                [user.balances['sAHM'] for user in self.users]
+            )
+
+
+            ## Rebase Rewards
             self.staking_AHM.rebase(
                 users = self.users, 
                 excess_reserve = self.bonds[0].excess_reserve(), 
-                total_sAHM = sum([i.balances['sAHM'] for i in self.users])
+                total_sAHM = sum(
+                    [user.balances['sAHM'] for user in self.users]
+                    )
                 )
             ## Daily epoch routine ==before loop
             # update total AHM balance from users
