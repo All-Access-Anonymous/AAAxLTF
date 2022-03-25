@@ -17,9 +17,8 @@ class Treasury():
     A Treasury has following baskets: 
         - non LP bonds
         - LP bonds
-
-
     """
+
     instance_number: int = 1
     all: List = []
 
@@ -41,4 +40,4 @@ class Treasury():
 
 
     def __repr__(self):
-        return f'Treasury-{self.id}: Bal={self.balances}'
+        return f'Treasury-{self.id}'

@@ -21,6 +21,7 @@ class User():
         - stake AHM
 
     """
+    
     instance_number: int = 1
     all: List = []
 

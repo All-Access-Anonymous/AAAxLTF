@@ -4,9 +4,9 @@ from defi.config import sim_conf
 # os.remove("simulation.log") 
 
 s = SimHandler(sim_conf)
-df, dfa, f = s.run()
+res = s.run()
 
 print('DF')
-print(df)
+print(res['df'])
 print('DFA')
-print(dfa)
+print(res['dfa'])

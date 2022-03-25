@@ -1,6 +1,12 @@
 sim_conf = {
     "days": 60,
-    "user_count": 50,
+    "user_count": 10,
+
+    ##STAKING
+    'staking_AHM_config': {
+        'reward_rate': 0.2,
+        'rebase_period': 1,
+    },
 
     ## USER
     "user_config":{
@@ -16,7 +22,7 @@ sim_conf = {
     ## BOND config
     "bond_config":{
         'bond_term':{
-            'bond_control_variable': 0, # Bonds must be initialized from 0
+            'bond_control_variable': 10, # Bonds must be initialized from 0
             'vesting_term': 5, #epoch (day) ; at least 36 hrs
             'min_price': 0.8,
             'max_payout': 10000, # 0.5% , can't be above 1%

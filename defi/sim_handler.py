@@ -93,7 +93,10 @@ class SimHandler:
         return None
 
     def instantiate_Staking_AHM(self) -> None:
-        self.staking_AHM = Staking_AHM()
+        self.staking_AHM = Staking_AHM(
+            rebase_period=self.config['staking_AHM_config']['rebase_period'],
+            reward_rate= self.config['staking_AHM_config']['reward_rate'],
+            )
         return None
 
     def instantiate_Treasury(self) -> None:
@@ -105,24 +108,12 @@ class SimHandler:
         return None
 
     def instantiate_Simulation(self) -> pd.DataFrame:
-        self.instantiate_Users(10) # instantiate users and store in self.users
+        self.instantiate_Users(self.config['user_count']) # instantiate users and store in self.users
         self.instantiate_Bonds(1) # instantiate bonds and store in self.bonds
         self.instantiate_Staking_AHM() # instantiated & stored in self.staking_AHM        
         self.instantiate_Treasury() # instantiated & stored in self.treasury_obj
         self.instantiate_Revenue() # instantiated & stored in self.revenue_obj
-        # self.staking_AHM.stake_AHM(self.users[0], 50)
-        # self.staking_AHM.stake_AHM(self.users[1], 100)
-        # self.staking_AHM.stake_AHM(self.users[2], 100)
-        # self.staking_AHM.stake_AHM(self.users[3], 200)
         return None
-
-    # def reset_simulation(self) -> None:
-    #     self.users = []
-    #     self.bonds = []
-    #     self.staking_AHM = None
-    #     self.treasury_obj = None
-    #     self.revenue_obj = None
-    #     return None
 
     def run(self):
         logger.info('$$$------------Starting Simulation------------$$$')
@@ -145,8 +136,12 @@ class SimHandler:
 
         for i in range(self.config['days']):
             logger.info(f'Epoch ------------------------------------------------ {i}')
-            # self.staking_AHM.add_interest_to_balances(interest_rate=1, users=self.users)
-            #### Daily epoch routine ==before loop
+            self.staking_AHM.rebase(
+                users = self.users, 
+                excess_reserve = self.bonds[0].excess_reserve(), 
+                total_sAHM = sum([i.balances['sAHM'] for i in self.users])
+                )
+            ## Daily epoch routine ==before loop
             # update total AHM balance from users
             self.bonds[0].sum_AHM_users = sum(
                 [i.balances['AHM'] + i.balances['sAHM'] for i in self.users]) +\
@@ -156,6 +151,12 @@ class SimHandler:
             if self.bonds[0].debt_ratio() > self.bonds[0].max_debt:
                 logger.warning("Bond is over debt limit, Max Capacity Reached")
             else:
+                if self.bonds[0].debt_ratio() < 0.3:
+                    deposit_amt = 100
+                elif self.bonds[0].debt_ratio() < 0.45:
+                    deposit_amt = 50
+                else:
+                    deposit_amt = 10
                 for user in self.users:
                     if user.balances['DAI'] > 0:
                         self.bonds[0].deposit(user, 10)
@@ -176,8 +177,6 @@ class SimHandler:
             # All user Redeemclaimable bonds
             self.bonds[0].redeem(self.users)
             # Adjust BCV if required
-            
-            
 
             ## - all users stake AHM
             # all users stake redeemed bonds
@@ -215,7 +214,8 @@ class SimHandler:
         df.columns = ['totalDebt', 'treasury']
         ##dfa
         dfa = pd.DataFrame(
-            [adjustments, current_debt, total_supply, bond_price, bcv, debt_ratio, excess_reserve]
+            [adjustments, current_debt, total_supply, 
+            bond_price, bcv, debt_ratio, excess_reserve]
             ).T
         dfa.columns = ['adjustments', 'current_debt', 'total_supply', 'bond_price',
                        'bcv', 'debt_ratio', 'excess_reserve']
@@ -232,7 +232,7 @@ class SimHandler:
             'treasury': self.etl_plot_stacked_bar(df, 'treasury', 'treasury'),
             'user1': self.etl_plot_stacked_bar(df_user, 0, 'Balance User 0'),
             
-            #     self.etl_plot_stacked_bar(df_user, i, f'Balance User-{i}') for i in range(len(df_user.columns))
+            #self.etl_plot_stacked_bar(df_user, i, f'Balance User-{i}') for i in range(len(df_user.columns))
             'totalDebt': self.plot_stacked_bar(df_totalDebt, 'totalDebt').to_json()
         }
 

@@ -11,7 +11,7 @@ logger.addHandler(file_handler)
 
 from typing import List, Dict
 
-class Staking_AHM():
+class Staking_AHM:
     """
 
     Is a staking contract where users can stake AHM to earn rebase rewards.
@@ -28,8 +28,8 @@ class Staking_AHM():
     instance_number: int = 1
     all: List = []
 
-    def __init__(self):
-        self.total_bonus = 0
+    def __init__(self, rebase_period: int, reward_rate: float) -> None:
+        self.reward_rate = 0.2
         self.warmup_period = 0
         self.epochNumber = 0
         self.rebase_period = 1
@@ -99,27 +99,33 @@ class Staking_AHM():
     def __repr__(self):
         return f'staking_AHM-{self.id}: total sAHM ={self.get_total_sAHM()}'
 
-    def rebase(self, users: object) -> None:
+    def rebase(self, users: object, excess_reserve: float, total_sAHM: float) -> None:
         """
         Rebase sAHM into AHM
         """
         if self.epochNumber % self.rebase_period == 0:
             ##[skipped] Check if there is excess reserves backing AHM, then only mint new AHM
-            ## =total reserves - (total AHM supply - total debt)
-            self.add_interest_to_balances(0.01, users)
+            ## Excess reserve in USD
+            reward_amount = excess_reserve * self.reward_rate * 0.01
+            self.add_rebase_rewards(reward_amount, users, total_sAHM)
             logger.info(f'{self.epochNumber} rebase')
             ##adjust from bond.py after every rebase
         else:
             pass
         return None
 
-    def add_interest_to_balances(self, interest_rate: float, users: object) -> None:
+    def add_rebase_rewards(self, reward_amount: float, users: object, total_sAHM: float) -> None:
         """
         Add interest to all sAHM in the contract
         """
+        if total_sAHM != 0:
+            reward_amount_per_sOHM = reward_amount / total_sAHM
+        else:
+            reward_amount_per_sOHM = 0
         for k in self.balances.keys():
-            to_add = self.balances[k]['sAHM'] * interest_rate * 0.01
+            to_add = self.balances[k]['sAHM'] * reward_amount_per_sOHM
             self.balances[k]['sAHM'] += to_add 
             #update balances in user wallets
             users[k-1].add_bal('sAHM', to_add)
+        logger.info(f'{reward_amount} sAHM distributed as rebase')
         return None

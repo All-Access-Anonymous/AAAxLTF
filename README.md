@@ -5,6 +5,7 @@ Modelling tokenomics similar to Olympous DAO.
 [AAA Model Diagrams in Miro](https://miro.com/app/board/uXjVOXwHq1M=/)
 
 ## Resources on OHM model:
+https://olympusdaonow.com/ohm-token-defi-2-0-platform-liquidity-v33-explained-march-22-examples-list-of-olympus-dao-forks-mkr-crv-time/
 
 https://www.jordanmmck.com/crypto/olympus-dao?s=09
 
