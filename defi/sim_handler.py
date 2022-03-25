@@ -230,11 +230,11 @@ class SimHandler:
         ## Charts
         charts = {
             "treasury": self.etl_plot_stacked_bar(df, "treasury", "treasury"),
-            "user1": self.etl_plot_stacked_bar(df_user, 0, "Balance User 0"),
+            "user1": self.etl_plot_stacked_bar(df_user, 0, "Balance_User_0"),
             "totalDebt": self.plot_stacked_bar(df_totalDebt, "totalDebt").to_json()
         }
 
-        return {'df': df.to_json(), 'dfa': dfa.to_json(), 'charts': charts}
+        return {"df": df.to_json(), "dfa": dfa.to_json(), "charts": charts}
 
     @staticmethod
     def plot_stacked_bar(df:pd.DataFrame, title:str):
