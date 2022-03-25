@@ -58,7 +58,7 @@ $ vf activate mazzy
 $ pip uninstall aaa-defi
 
 # Install updated package
-$ pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@defi-model#egg=aaa-defi
+$ python3 -m pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@defi-model#egg=aaa-defi
 ```
 ---
 
