@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.propagate = False
-formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+formatter = logging.Formatter('%(levelname)s:%(name)s     %(message)s')
 file_handler = logging.FileHandler('simulation.log')
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
@@ -24,7 +24,7 @@ class Treasury():
 
     def __init__(self, received_conf: Dict = {}):
         # Deposit 9,000,000 DAI to treasury, 600,000 AHM gets minted to deployer and 8,400,000 are in treasury as excesss reserves
-        self.balances: dict() = {'DAI': 9000, 'AHM': 0}
+        self.balances: dict() = {'DAI': 90000, 'AHM': 0}    #update according the minter balance
         self.ratio: dict() = {
             'reserve': 0.2,
             'lp': 0.6,

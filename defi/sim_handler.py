@@ -19,7 +19,7 @@ logger.setLevel(logging.DEBUG)
 logger.propagate = False
 
 # formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
-formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+formatter = logging.Formatter('%(levelname)s:%(name)s     %(message)s')
 
 file_handler = logging.FileHandler('simulation.log')
 # # Only logs above ERROR gets to file
@@ -34,6 +34,7 @@ logger.addHandler(file_handler)
 # logger.addHandler(stream_handler)
 
 ## import class objects 
+import pprint
 from typing import List, Dict
 from defi.user import User
 from defi.bond import Bond
@@ -73,8 +74,8 @@ class SimHandler:
         
         minter_bal = {
             'DAI': 0,
-            'AHM': 600,
-            'sAHM': 0,
+            'AHM': 0,
+            'sAHM': 6000,
             'ETH': 0,
         }
         minter = User(minter_bal)
@@ -142,31 +143,31 @@ class SimHandler:
                 [user.balances['sAHM'] for user in self.users]
             )
 
-
             ## Rebase Rewards
             self.staking_AHM.rebase(
                 users = self.users, 
+                minter = self.minter,
                 excess_reserve = self.bonds[0].excess_reserve(), 
                 total_sAHM = sum(
                     [user.balances['sAHM'] for user in self.users]
-                    )
+                    ) + self.minter.balances['sAHM']
                 )
             ## Daily epoch routine ==before loop
             # update total AHM balance from users
             self.bonds[0].sum_AHM_users = sum(
                 [i.balances['AHM'] + i.balances['sAHM'] for i in self.users]) +\
-                    self.minter.balances['AHM']
+                    self.minter.balances['sAHM']
 
             # all users bond after every 7th epoch 
             if self.bonds[0].debt_ratio() > self.bonds[0].max_debt:
                 logger.warning("Bond is over debt limit, Max Capacity Reached")
             else:
                 if self.bonds[0].debt_ratio() < 0.3:
-                    deposit_amt = 100
+                    deposit_amt = 1000
                 elif self.bonds[0].debt_ratio() < 0.45:
-                    deposit_amt = 50
+                    deposit_amt = 500
                 else:
-                    deposit_amt = 10
+                    deposit_amt = 100
                 for user in self.users:
                     if user.balances['DAI'] > 0:
                         self.bonds[0].deposit(user, 10)
@@ -243,6 +244,9 @@ class SimHandler:
             "user1": self.etl_plot_stacked_bar(df_user, 0, "Balance_User_0"),
             "totalDebt": self.plot_stacked_bar(df_totalDebt, "totalDebt").to_json()
         }
+
+        ##debug
+        logger.info(pprint.pprint(self.bonds[0].BondInfo))
 
         return {"df": df.to_json(), "dfa": dfa.to_json(), "charts": charts}
 

@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.propagate = False
-formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+formatter = logging.Formatter('%(levelname)s:%(name)s     %(message)s')
 file_handler = logging.FileHandler('simulation.log')
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
@@ -76,33 +76,18 @@ class Staking_AHM:
     def __repr__(self):
         return f'staking_AHM-{self.id}: total sAHM ={self.total_sAHM}'
 
-    def rebase(self, users: object, excess_reserve: float, total_sAHM: float) -> None:
+    def rebase(self, users: object, minter: object, excess_reserve: float, total_sAHM: float) -> None:
         """
         Rebase sAHM into AHM
         """
-        if self.epochNumber % self.rebase_period == 0:
-            ##[skipped] Check if there is excess reserves backing AHM, then only mint new AHM
-            ## Excess reserve in USD
-            reward_amount = excess_reserve * self.reward_rate * 0.01
-            self.add_rebase_rewards(reward_amount, users, total_sAHM)
-            logger.info(f'{self.epochNumber} rebase')
-            ##adjust from bond.py after every rebase
-        else:
-            pass
-        return None
-
-    def add_rebase_rewards(self, reward_amount: float, users: object, total_sAHM: float) -> None:
-        """
-        Add rebase rewards to all users who have staked their AHM
-        """
         if total_sAHM != 0:
-            reward_amount_per_sOHM = reward_amount / total_sAHM
-        else:
-            reward_amount_per_sOHM = 0
-
-        to_add = self.total_sAHM * reward_amount_per_sOHM
-        for user in users:
-            user.balances['sAHM'] += to_add
-            logger.info(f'user {user.id} received {to_add} sAHM')
-        logger.info(f'{reward_amount} sAHM distributed as rebase')
+            if self.epochNumber % self.rebase_period == 0:
+                if excess_reserve > 100:
+                    reward_amount = excess_reserve * self.reward_rate * 0.01
+                    reward_amount_per_sOHM = reward_amount / total_sAHM
+                    minter.balances['sAHM'] += minter.balances['sAHM'] * reward_amount_per_sOHM
+                    logger.info(f'Minter sAHM rebased')
+                    for user in users:
+                        user.balances['sAHM'] += user.balances['sAHM'] * reward_amount_per_sOHM
+                        logger.info(f'user {user.id} sAHM rebased')
         return None

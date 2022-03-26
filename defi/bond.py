@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.propagate = False
-formatter = logging.Formatter('%(levelname)s:%(name)s::: %(message)s')
+formatter = logging.Formatter('%(levelname)s:%(name)s     %(message)s')
 file_handler = logging.FileHandler('simulation.log')
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
@@ -176,17 +176,16 @@ class Bond():
         Calculate current ratio of debt to AHM supply
         Returns debt ratio
         """
-        return self.current_debt() / self.total_supply()
+        if self.total_supply() == 0:
+            return 0
+        else:
+            return self.current_debt() / self.total_supply() 
 
     def total_supply(self) -> int:
         """
         Calculate total supply of AHM
         """
-        sum_AHM = self.treasury['AHM'] + self.sum_AHM_users
-        if sum_AHM == 0:
-            return 1
-        
-        logger.info(f'Total AHM supply: {sum_AHM}')
+        sum_AHM = self.treasury['AHM'] + self.sum_AHM_users        
         return sum_AHM
 
     def standardized_Debt_Ratio(self) -> int:
@@ -297,6 +296,7 @@ class Bond():
                 'pricePaid': value, #in USD
                 'epochAmt': pay_out/self.vesting_term
             }
+            logger.info(msg=f'User {user.id} deposited {amount} {self.principle} for {pay_out} AHM')
 
             ##update debt info
             self.totalDebt = self.totalDebt + pay_out # + pay_out * (1+bond_discount_factor)
