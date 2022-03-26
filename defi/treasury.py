@@ -23,7 +23,7 @@ class Treasury():
     all: List = []
 
     def __init__(self, received_conf: Dict = {}):
-        # Deposit 9,000,000 DAI to treasury, 600,000 AHM gets minted to deployer and 8,400,000 are in treasury as excesss reserves
+        # Deposit 90,000 DAI to treasury, 6,000 AHM gets minted to deployer and 84,000 are in treasury as excesss reserves
         self.balances: dict() = {'DAI': 90000, 'AHM': 0}    #update according the minter balance
         self.ratio: dict() = {
             'reserve': 0.2,

@@ -240,9 +240,9 @@ class SimHandler:
 
         ## Charts
         charts = {
-            "treasury": self.etl_plot_stacked_bar(df, "treasury", "treasury"),
-            "user1": self.etl_plot_stacked_bar(df_user, 0, "Balance_User_0"),
-            "totalDebt": self.plot_stacked_bar(df_totalDebt, "totalDebt").to_json()
+            "treasury": self.etl_plot_stacked_bar(df, "treasury", "Treasury"),
+            "user1": self.etl_plot_stacked_bar(df_user, 5, "User Balance"),
+            "totalDebt": self.plot_stacked_bar(df_totalDebt, "Total debt").to_json()
         }
 
         ##debug
@@ -259,7 +259,7 @@ class SimHandler:
                     y = [c for c in df.columns],
                     # template = 'plotly_dark',
                     color_discrete_sequence = colors,
-                    title = title, 
+                    # title = title, 
                     )
         # fig.show()
         return fig
