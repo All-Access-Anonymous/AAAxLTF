@@ -15,8 +15,13 @@ from typing import List, Dict
 class Treasury():
     """
     A Treasury has following baskets: 
-        - non LP bonds
-        - LP bonds
+        - Reserve assets from reserve bonds
+        - LP token assets from LP bonds
+    
+    To manage treasury efficiently, Treasury has following split ratios:
+        - reserve: 0.2 ; As a reserve assets inside treasury
+        - lp: 0.6 ; As a LP assets inside treasury generating revenue as LP rewards
+        - lend: 0.2 ; As a lend assets inside treasury generating revenue from fiat loans to Vendors
     """
 
     instance_number: int = 1
