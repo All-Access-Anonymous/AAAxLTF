@@ -1,5 +1,9 @@
 # AAA tokenomics
 
+Protocol simulation https://my.machinations.io/d/AAA-PID-Controller/8a231d5caf7411ec8c2902f943517e50
+
+Tokenomic Report https://hackmd.io/J2NeJ-usReSFplZ6dbrJqQ
+
 ## BaseTen models and apps
 
 Bond simulation https://app.baseten.co/applications/VqK33qo/operator_views/Q04Lz0d
