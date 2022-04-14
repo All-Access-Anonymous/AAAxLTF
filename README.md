@@ -1,5 +1,13 @@
 # AAA tokenomics
 
+## BaseTen models and apps
+
+Bond simulation https://app.baseten.co/applications/VqK33qo/operator_views/Q04Lz0d
+
+Ticket sales simulaiton https://app.baseten.co/applications/b0dVjqn/operator_views/eP39pBJ
+
+Liquidity Bootstrap Pool simulator https://www.ltf.dev/
+
 [![GitHub Super-Linter](https://github.com/longtailfinancial/aaa-tokenomics/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
 Modelling tokenomics similar to https://fantohm.com/ for our use case.
