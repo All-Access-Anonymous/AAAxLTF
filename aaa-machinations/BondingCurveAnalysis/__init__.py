@@ -30,10 +30,10 @@ Houses a bonding curve function and reserve for analytics.
     Typical usage example:
 
     curve = SigmoidCurve(2, 5, 2)
-    total_token_amount = 2000000
+    total_token_supply = 2000000
 
     # Create BondingCurve
-    bonding_curve = BondingCurveAnalysis(curve, total_token_amount)
+    bonding_curve = BondingCurveAnalysis(curve, total_token_supply)
 """
 
 import Reserve
@@ -49,22 +49,22 @@ class BondingCurveAnalysis:
 
         Attributes:
             curve_function: a bonding curve function.
-            total_token_amount: int total amount of tokens circulating the market.
+            total_token_supply: int total amount of tokens circulating the market.
             reserve: reserve asset backing the token.
             detail_level: int above 0 value amount of points to plot.
     """
     
     def __init__(self,
                  curve_function: Curves.SigmoidCurve,
-                 total_token_amount: int,
+                 total_token_supply: int,
                  reserve_power: float,
                  bonding_curve: np.ndarray = np.empty(0),
                  detail_level: int = 1000):
         """Initialize this class with the parameter values"""
 
         try:
-            if total_token_amount < 0:
-                raise ValueError("total_token_amount need to be non-negative integer.")
+            if total_token_supply < 0:
+                raise ValueError("total_token_supply need to be non-negative integer.")
             elif detail_level < 0:
                 raise ValueError("detail_level need to be non-negative integer.")
 
@@ -73,14 +73,14 @@ class BondingCurveAnalysis:
 
         else:
             self.curve_function: Curves.SigmoidCurve = curve_function
-            self.total_token_amount: int = total_token_amount
+            self.total_token_supply: int = total_token_supply
             self.reserve_power: float = reserve_power 
             self.detail_level: int = detail_level
 
 
             # This is required to plot the curve and draw sexy graphs
             self._linear_space_token_amount: np.ndarray = np.linspace(0, 
-                                                                      total_token_amount, 
+                                                                      total_token_supply, 
                                                                       detail_level)
 
             # Do not use this variable directly as it's initally None.
@@ -98,7 +98,7 @@ class BondingCurveAnalysis:
         # Here we check if self._bonding_curve is defined.
         if len(self._bonding_curve) == 0:
     
-            self._bonding_curve = np.linspace(0, self.total_token_amount, self.detail_level)
+            self._bonding_curve = np.linspace(0, self.total_token_supply, self.detail_level)
 
             for i in range(self.detail_level):
                 self._bonding_curve[i] = self.curve_function.f(self._linear_space_token_amount[i])
@@ -133,7 +133,7 @@ class BondingCurveAnalysis:
 
         if len(self._inflation) == 0:
 
-            self._inflation = np.linspace(0, self.total_token_amount, self.detail_level)
+            self._inflation = np.linspace(0, self.total_token_supply, self.detail_level)
 
             for i in range (self.detail_level):
                 self._inflation[i] = self.bonding_curve[i] - self.reserve[i]
