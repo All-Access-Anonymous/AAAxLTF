@@ -100,7 +100,7 @@ class BondingCurveAnalysis:
     
             self._bonding_curve = np.linspace(0, self.total_token_amount, self.detail_level)
 
-            for i in range(self.total_token_amount):
+            for i in range(self.detail_level):
                 self._bonding_curve[i] = self.curve_function.f(self._linear_space_token_amount[i])
 
         return self._bonding_curve
