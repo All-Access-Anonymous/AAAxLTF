@@ -49,14 +49,14 @@ class Reserve:
     def __init__(self,
                  reserve_power: float,
                  token_price: np.ndarray,
-                 total_token_amount: np.ndarray):
+                 detail_level: int):
         """Initialize this class with parameter values."""
 
         try:
             if reserve_power < 0:
                 raise ValueError("reserve_power value cannot be negative.")
 
-            elif len(total_token_amount) != len(token_price):
+            elif detail_level != len(token_price):
                 raise ValueError("np.ndarray size of total_token_amount and token_price \
                         needs to be equal")
 
@@ -66,7 +66,7 @@ class Reserve:
         else:
             self.reserve_power: float = reserve_power
             self.token_price: np.ndarray = token_price
-            self.total_token_amount: np.ndarray = total_token_amount
+            self.total_token_amount: np.ndarray = np.linspace(0, 1, detail_level)
 
     def find_reserve (self) -> np.ndarray:
         """Find reserve of token price.

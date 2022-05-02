@@ -33,6 +33,7 @@ Graph representation:
 """
 
 import numpy as np
+import math
 
 
 class SigmoidCurve:
@@ -58,7 +59,7 @@ class SigmoidCurve:
         self.x_transition: float = x_transition
         self.steepness: float = steepness
     
-    def f(self, x: float | np.ndarray) -> float | np.ndarray:
+    def f(self, x: float) -> float:
         """A sigmoid function that returns f(x).
             
             Arg:
@@ -67,5 +68,5 @@ class SigmoidCurve:
             Return:
                 Same datatype of input(float or numpy.ndarray) value of f(x).
         """
-        y = self.slope_height * (((x - self.x_transition) / np.sqrt(self.steepness + np.power(x - self.x_transition, 2))) + 1)
+        y = self.slope_height * (((x - self.x_transition) / math.sqrt(self.steepness + ((x - self.x_transition) ** 2))) + 1)
         return y

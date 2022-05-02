@@ -58,6 +58,7 @@ class BondingCurveAnalysis:
                  curve_function: Curves.SigmoidCurve,
                  total_token_amount: int,
                  reserve_power: float,
+                 bonding_curve: np.ndarray = np.empty(0),
                  detail_level: int = 1000):
         """Initialize this class with the parameter values"""
 
@@ -76,10 +77,16 @@ class BondingCurveAnalysis:
             self.reserve_power: float = reserve_power 
             self.detail_level: int = detail_level
 
+
             # This is required to plot the curve and draw sexy graphs
-            self._linear_space_token_amount: np.ndarray = np.linspace(0, total_token_amount, detail_level)
-            self._bonding_curve = None
-            self._reserve = None
+            self._linear_space_token_amount: np.ndarray = np.linspace(0, 
+                                                                      total_token_amount, 
+                                                                      detail_level)
+
+            # Do not use this variable directly as it's initally None.
+            self._bonding_curve: np.ndarray = bonding_curve
+            self._reserve = None 
+            self._inflation: np.ndarray = np.empty(0)
 
     @property
     def bonding_curve(self):
@@ -89,16 +96,21 @@ class BondingCurveAnalysis:
         # needs it.
 
         # Here we check if self._bonding_curve is defined.
-        if self._bonding_curve == None:
-            self._bonding_curve = self.curve_function.f(self._linear_space_token_amount)
+        if len(self._bonding_curve) == 0:
+    
+            self._bonding_curve = np.linspace(0, self.total_token_amount, self.detail_level)
+
+            for i in range(self.total_token_amount):
+                self._bonding_curve[i] = self.curve_function.f(self._linear_space_token_amount[i])
 
         return self._bonding_curve
 
     def build_bonding_curve_figure(self):
         return px.line(x=self._linear_space_token_amount,
-                       y=self.curve_function.f(self._linear_space_token_amount))
+                       y=self.bonding_curve)
 
-    def get_reserve(self):
+    @property
+    def reserve(self):
         # Creating reserve can become a costly computation as the number of plots increase.
         # Hence, reserve will only be created when it's required by user.
 
@@ -107,8 +119,27 @@ class BondingCurveAnalysis:
             # At class initialization, self.reserve is not defined.
             # So when user calls this function, initialize the variable now.
             self._reserve = Reserve.Reserve(self.reserve_power, 
-                                           self._bonding_curve,
-                                           self._linear_space_token_amount)
+                                            self.bonding_curve,
+                                            self.detail_level)
 
         return self._reserve.find_reserve()
 
+    def build_reserve_figure(self):
+        return px.line(x=self._linear_space_token_amount,
+                       y=self.reserve)
+
+    @property
+    def inflation(self):
+
+        if len(self._inflation) == 0:
+
+            self._inflation = np.linspace(0, self.total_token_amount, self.detail_level)
+
+            for i in range (self.detail_level):
+                self._inflation[i] = self.bonding_curve[i] - self.reserve[i]
+
+        return self._inflation
+
+    def build_inflation_figure(self):
+        return px.line(x=self._linear_space_token_amount,
+                       y=self.inflation)
