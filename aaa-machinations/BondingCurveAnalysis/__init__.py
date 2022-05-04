@@ -57,6 +57,8 @@ class BondingCurveAnalysis:
     # Used for graphing curves in graph_objects
     # Options are: lines, markers, lines+markers
     go_fig_mode = "lines"
+    xaxes_title = "Token supply"
+    yaxes_title = "Price"
     
     def __init__(self,
                  token_name: str,
@@ -174,6 +176,8 @@ class BondingCurveAnalysis:
         fig.add_trace(self.build_reserve_figure())
         fig.add_trace(self.build_inflation_figure())
 
+        fig.update_xaxes(title_text = self.xaxes_title)
+        fig.update_yaxes(title_text = self.yaxes_title)
         fig.update_layout(title = self.token_name, hovermode = "x unified")
 
         return fig
