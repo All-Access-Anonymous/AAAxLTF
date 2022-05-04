@@ -40,7 +40,7 @@ import Reserve
 import Curves 
 
 import numpy as np
-import plotly.express as px
+import plotly.graph_objects as go 
 
 class BondingCurveAnalysis:
     """A class that houses a bonding curve function and reserve to analyze the market.
@@ -53,8 +53,13 @@ class BondingCurveAnalysis:
             reserve: reserve asset backing the token.
             detail_level: int above 0 value amount of points to plot.
     """
+
+    # Used for graphing curves in graph_objects
+    # Options are: lines, markers, lines+markers
+    go_fig_mode = "lines"
     
     def __init__(self,
+                 token_name: str,
                  curve_function: Curves.SigmoidCurve,
                  total_token_supply: int,
                  reserve_power: float,
@@ -72,6 +77,8 @@ class BondingCurveAnalysis:
             print(err)
 
         else:
+            # Here we initialize the properties
+            self.token_name: str = token_name
             self.curve_function: Curves.SigmoidCurve = curve_function
             self.total_token_supply: int = total_token_supply
             self.reserve_power: float = reserve_power 
@@ -83,9 +90,13 @@ class BondingCurveAnalysis:
                                                                       total_token_supply, 
                                                                       detail_level)
 
-            # Do not use this variable directly as it's initally None.
-            self._bonding_curve: np.ndarray = bonding_curve
+            # Do not use this variable directly as it's desiged to be initialized by
+            # property methods like the one below.
             self._reserve = None 
+            # User can supply this value from other instance of this class at 
+            # initialization but when nothing is passed, np.empty(0) will be used as 
+            # default value.
+            self._bonding_curve: np.ndarray = bonding_curve
             self._inflation: np.ndarray = np.empty(0)
 
     @property
@@ -94,8 +105,9 @@ class BondingCurveAnalysis:
         # the detail_level goes over 100000.
         # Hence, this variable is not initialized at __init__ and only initialized when the user
         # needs it.
-
-        # Here we check if self._bonding_curve is defined.
+        
+        # Recall that _bonding_curve was initialized with empty np.ndarray at class construction,
+        # so, check its length.
         if len(self._bonding_curve) == 0:
     
             self._bonding_curve = np.linspace(0, self.total_token_supply, self.detail_level)
@@ -105,13 +117,16 @@ class BondingCurveAnalysis:
 
         return self._bonding_curve
 
-    def build_bonding_curve_figure(self):
-        return px.line(x=self._linear_space_token_amount,
-                       y=self.bonding_curve)
+    def build_bonding_curve_figure(self, name: str = "Bonding Curve"):
+        return go.Scatter(x = self._linear_space_token_amount,
+                          y = self.bonding_curve,
+                          name = name,
+                          mode = self.go_fig_mode) 
 
     @property
     def reserve(self):
-        # Creating reserve can become a costly computation as the number of plots increase.
+        # As discussed above creating reserve can become a costly computation as the 
+        # number of plots increase.
         # Hence, reserve will only be created when it's required by user.
 
         # Here we check if self.reserve is defined.
@@ -124,15 +139,21 @@ class BondingCurveAnalysis:
 
         return self._reserve.find_reserve()
 
-    def build_reserve_figure(self):
-        return px.line(x=self._linear_space_token_amount,
-                       y=self.reserve)
+    def build_reserve_figure(self, name: str = "Reserve"):
+        return go.Scatter(x = self._linear_space_token_amount,
+                          y = self.reserve,
+                          name = name,
+                          mode = self.go_fig_mode) 
 
     @property
     def inflation(self):
+        # Same concern as bonding_curve and reserve methods above.
 
+        # Recall that _inflation was initialized with empty np.ndarray at class construction,
+        # so, check its length.
         if len(self._inflation) == 0:
-
+        # When the length is zero it means the inflation was not computed yet,
+        # so, do it now.
             self._inflation = np.linspace(0, self.total_token_supply, self.detail_level)
 
             for i in range (self.detail_level):
@@ -140,6 +161,25 @@ class BondingCurveAnalysis:
 
         return self._inflation
 
-    def build_inflation_figure(self):
-        return px.line(x=self._linear_space_token_amount,
-                       y=self.inflation)
+    def build_inflation_figure(self, name: str = "Inflation"):
+        return go.Scatter(x = self._linear_space_token_amount,
+                          y = self.inflation,
+                          name = name,
+                          mode = self.go_fig_mode) 
+
+    def build_figure(self):
+        fig = go.Figure()
+
+        fig.add_trace(self.build_bonding_curve_figure())
+        fig.add_trace(self.build_reserve_figure())
+        fig.add_trace(self.build_inflation_figure())
+
+        fig.update_layout(title = self.token_name, hovermode = "x unified")
+
+        return fig
+
+    def show_figure(self) -> None:
+        fig = self.build_figure()
+
+        fig.show()
+
