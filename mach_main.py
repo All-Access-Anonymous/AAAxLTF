@@ -16,4 +16,8 @@ def main():
                                  reserve_power = reserve_power,
                                  detail_level = detail_level)
     
-    wsAAA.show_figure()
+    print(wsAAA.fig_as_json())
+
+
+if __name__ == "__main__":
+    main()

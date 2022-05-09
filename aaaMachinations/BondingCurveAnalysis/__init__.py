@@ -36,8 +36,8 @@ Houses a bonding curve function and reserve for analytics.
     bonding_curve = BondingCurveAnalysis(curve, total_token_supply)
 """
 
-import Reserve
-import Curves 
+from .. import Reserve
+from .. import Curves 
 
 import numpy as np
 import plotly.graph_objects as go 
