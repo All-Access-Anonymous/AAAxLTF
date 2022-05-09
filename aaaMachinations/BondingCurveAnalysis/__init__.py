@@ -68,7 +68,6 @@ class BondingCurveAnalysis:
                  bonding_curve: np.ndarray = np.empty(0),
                  detail_level: int = 1000):
         """Initialize this class with the parameter values"""
-
         try:
             if total_token_supply < 0:
                 raise ValueError("total_token_supply need to be non-negative integer.")
@@ -187,3 +186,5 @@ class BondingCurveAnalysis:
 
         fig.show()
 
+    def fig_as_json(self):
+        return self.build_figure().to_json()
