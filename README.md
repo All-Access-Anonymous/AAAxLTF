@@ -12,8 +12,6 @@ Ticket sales simulaiton https://app.baseten.co/applications/b0dVjqn/operator_vie
 
 Liquidity Bootstrap Pool simulator https://www.ltf.dev/
 
-[![GitHub Super-Linter](https://github.com/longtailfinancial/aaa-tokenomics/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
-
 Modelling tokenomics similar to https://fantohm.com/ for our use case.
 
 ## AAA Model Diagrams
@@ -28,19 +26,29 @@ https://0xkowloon.substack.com/p/dissecting-the-olympus-protocol
 
 https://forum.olympusdao.finance/d/77-oip-18-reward-rate-framework-and-reduction
 
+# Jupyter Notebook Usage
+1. Create virtual fish environment.  
+`$ vf new aaa`  
+1.1.(Optional) Connect that virtual environment to working directory.  This eliminates
+the need to type virutal fish environment activate command. `$vf connect`
+2. Download & install required packages.  
+`$ python3 -m pip install -r requirements.txt`  
+3. Add virtual fish environment to Jupyter kernel.
+[More detailed guide](https://janakiev.com/blog/jupyter-virtual-envs/)  
+`python3 -m pip install --user ipykernel`  
+`python3 -m ipykernel install --user --name=aaa`
+4. Fire up Jupyter Notebook and you are good to go. :thumbsup:  
+`$ jupyter notebook`
+
 # Deployment
 To be able to install aaa-tokenomics as Python pakcage, you need to have ssh-key setup with Github and proper access rights to this repo.  
-
-```
-pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@danny#egg=aaa
-```
 
 ## Requirements
 Python >= 3.10  
 [Virtualfish](https://virtualfish.readthedocs.io/en/latest/install.html)  
 [Ssh-key on github](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 
-## Installation 
+## Installation
 ```
 # Start new virtual fish environment (you can replace 'AAA' into something you prefer)
 $ vf new AAA
@@ -52,26 +60,17 @@ $ vf activate AAA
 # Note: requires ssh-key setup with your github account with access to this repo
 $ python3 -m pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@main#egg=aaa
 ```
-### Updating package
+## Updating package
 ```
-# Uninstall AAA package
-$ vf activate AAA
-$ python3 -m pip uninstall aaa
-
 # Install updated package
-$ python3 -m pip install git+ssh://git@github.com/longtailfinancial/aaa-tokenomics.git@main#egg=aaa
+$ python3 -m pip install --update aaa
 ```
 
-## Progress:
-- [x] Setup this project as Python package to be pip installable
-- [x] Implement visual presentation of the simulation
-- [x] Add dynamic simulation state configuration (seats tiers, ticket price increase and purchase probability)
-- [x] Bring back Github Actions with better code linter
-- [x] Build the skeleton of the simulation (concert attendee and market)
-=======
 ## Development
 Update package requirements at pyproject.toml if you have installed or updated a
-python package. 
+python package.
+
+Edit the package version if you have changed anything.  
 
 
 ## Warning
